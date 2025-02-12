@@ -25,6 +25,10 @@
           <input type="checkbox" value="titleCheck" v-model="selectedTests" />
           Page Title Check
         </label>
+        <label>
+          <input type="checkbox" value="navbarTitleCheckTest" v-model="selectedTests" />
+          Navbar Title Check
+        </label>
       </div>
       <div class="padding-1"></div>
       <button @click="submitTests">Run Tests</button>
