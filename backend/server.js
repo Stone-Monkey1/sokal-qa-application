@@ -7,6 +7,9 @@ const loadTimeTest = require("./Tests/loadTimeTest");
 const titleCheckTest = require("./Tests/titleCheckTest");
 const navbarTitleCheckTest = require("./Tests/navbarTitleCheckTest");
 
+// IMPORT UTILITY
+const runAdditionalChecks = require("./Utility/runAdditionalChecks");
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -40,7 +43,7 @@ async function runTests(url, tests) {
     results.title = await titleCheckTest(page);
   }
   if (tests.includes("navbarTitleCheckTest")) {
-    results.navbarPageTitles = await navbarTitleCheckTest(page);
+    results.navbarPageTitles = await navbarTitleCheckTest(page, tests);
   }
 
   await browser.close();
