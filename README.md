@@ -28,9 +28,12 @@ How to add the tests you made to the github repository:
 
 1. cd back into the main file. This is important because accidentally doing git stuff within the backend or frontend file can lead to having nested repositories and it's complicated, and I don't want to figure out how to fix it :D
 2. Please make sure you're in the website-playwright-qa file in the terminal before continuing.
-3. We first need to make sure you have the most updated version of the repository, in case someone made an update while you were working on yours. To do that run "git pull origin main"
-4. If there are discrepancies github will ask if you want to merge them manually, you can probably do that since the changes SHOULDN'T me many. Since we'll only be in a few files :D :D :D
-5. Run "git status" this will show you the current changes that exist in the local repository.
-6. After you've taken a look at the differences, run "git add backend/tests/yourNewTestName.js etc." make sure you add just the files you made/altered. If you're adding a new test it will at least look like this: "git add backend/tests/newTest.js backend/server.js frontend/src/components/QAForm.vue"
-7. Once you'd added the files you changed you're ready to commit "git commit -m "Added new test for XYZ and updated UI selection"
-8. Hopefully it's that smooth
+3. If you're adding a new test you will need to add the files you changed which should look something like this: "git add backend/tests/newTest.js backend/server.js frontend/src/components/QAForm.vue"
+4. Once you've added the files you changed you're ready to commit "git commit -m "Added new test for XYZ and updated UI selection".
+5. Before we push we first need to make sure you have the most updated version of the repository, in case someone made an update while you were working on yours. To do that run "git pull origin main --rebase". If no one else has pushed changes, Git will say "Already up to date". If someone has pushed changes, Git will reapply their work on top of the latest commit.
+6. If there are discrepancies github will ask if you want to merge them manually, you can probably do that since the changes SHOULDN'T me many. Since we'll only be in a few files :D :D :D
+7. Once you've made the manual changes you'll need to mark the changes resolved by running "git add backend/server.js" or whichever file it was that had discrepancies. Then, move on with the rebase "git rebase --continue". Then you'll do the same process for the next file.
+8. Run "git push origin main"
+9. Hopefully it's that smooth
+
+IGNORE ALL FILES NOT REFERENCED IN THIS README UNLESS YOU TALK TO ALEC FIRST
