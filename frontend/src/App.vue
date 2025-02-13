@@ -2,7 +2,10 @@
   <div>
     <QAToDo/>
     <QAForm @run-tests="runTests" />
-    <QAResults v-if="results" :results="results" />
+    <QAResults v-if="results" :results="results"/>
+    <div class="git-push-test-section">
+      <p>Testing testing testing</p>
+    </div>
   </div>
 </template>
 
@@ -40,3 +43,14 @@ export default {
   },
 };
 </script>
+<style>
+ .git-push-test-section {
+  background-color: #2b2b2b;
+  color: #eeeeee;
+  padding: 24px;
+  font-size: 2em;
+  font-weight: light;
+  width: 100%;
+  border: 1px solid #000000;
+ }
+</style>
