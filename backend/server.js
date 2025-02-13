@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { chromium } = require("playwright");
 
-// Import individual tests
+//  IMPORT TESTS!!
 const loadTimeTest = require("./Tests/loadTimeTest");
 const titleCheckTest = require("./Tests/titleCheckTest");
 const navbarTitleCheckTest = require("./Tests/navbarTitleCheckTest");
@@ -20,7 +20,7 @@ async function runTests(url, tests) {
   });
   const page = await context.newPage();
 
-  // Apply stealth-like JavaScript to evade detection
+  // Apply stealth-like JavaScript to evade detection. I tried to asked Carson if this is sus or not, no response yet.
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "webdriver", { get: () => false });
     Object.defineProperty(navigator, "languages", {
@@ -31,13 +31,13 @@ async function runTests(url, tests) {
 
   await page.goto(url, { timeout: 60000 });
 
-  if (tests.includes("loadTime")) {
-    const timing = await page.evaluate(() => performance.timing);
-    results.loadTime = timing.loadEventEnd - timing.navigationStart;
-  }
+  // ADD TESTS YOU'VE IMPORTED HERE
 
+  if (tests.includes("loadTime")) {
+    results.loadTime = await loadTimeTest(page);
+  }
   if (tests.includes("titleCheck")) {
-    results.title = await page.title();
+    results.title = await titleCheckTest(page);
   }
   if (tests.includes("navbarTitleCheckTest")) {
     results.navbarPageTitles = await navbarTitleCheckTest(page);
