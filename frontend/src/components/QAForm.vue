@@ -12,7 +12,12 @@
     </div>
     <div class="padding-5-percent">
       <label for="url">Website Homepage URL:</label>
-      <input class="website-url" type="text" v-model="url" placeholder="https://gosokal.com" />
+      <input
+        class="website-url"
+        type="text"
+        v-model="url"
+        placeholder="https://gosokal.com"
+      />
       <div class="padding-1"></div>
       <h3>Select Tests:</h3>
       <div class="padding-quarter"></div>
@@ -26,12 +31,28 @@
           Page Title Check
         </label>
         <label>
-          <input type="checkbox" value="navbarTitleCheckTest" v-model="selectedTests" />
+          <input
+            type="checkbox"
+            value="navbarTitleCheckTest"
+            v-model="selectedTests"
+          />
           Navbar Title Check
         </label>
         <label>
-          <input type="checkbox" value="navbarH1CheckTest" v-model="selectedTests" />
+          <input
+            type="checkbox"
+            value="navbarH1CheckTest"
+            v-model="selectedTests"
+          />
           H1 Check
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="navbarAltTagRepeatTest"
+            v-model="selectedTests"
+          />
+          Alt Repeat
         </label>
       </div>
       <div class="padding-1"></div>
@@ -67,9 +88,9 @@ export default {
   margin-right: 1rem;
 }
 .qa-form input.website-url {
-    width: 50vw;
+  width: 50vw;
 }
 .qa-form .test-checklist label:not(:last-of-type) {
-    margin-bottom: 0.7rem;
+  margin-bottom: 0.7rem;
 }
 </style>

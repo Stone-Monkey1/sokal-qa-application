@@ -7,6 +7,7 @@ const loadTimeTest = require("./Tests/loadTimeTest");
 const titleCheckTest = require("./Tests/titleCheckTest");
 const navbarTitleCheckTest = require("./Tests/navbarTitleCheckTest");
 const navbarH1CheckTest = require("./Tests/navbarH1CheckTest");
+const navbarAltTagRepeatTest = require("./Tests/navbarAltTagRepeatTest")
 
 // IMPORT UTILITY
 const runAdditionalChecks = require("./Utility/runAdditionalChecks");
@@ -48,6 +49,9 @@ async function runTests(url, tests) {
   }
   if (tests.includes("navbarH1CheckTest")) {
     results.navbarH1Check = await navbarH1CheckTest(page, tests);
+  }
+  if (tests.includes("navbarAltTagRepeatTest")) {
+    results.navbarAltTagRepeatTest = await navbarAltTagRepeatTest(page, tests);
   }
 
   await browser.close();
