@@ -6,6 +6,7 @@ const { chromium } = require("playwright");
 const loadTimeTest = require("./Tests/loadTimeTest");
 const titleCheckTest = require("./Tests/titleCheckTest");
 const navbarTitleCheckTest = require("./Tests/navbarTitleCheckTest");
+const navbarH1CheckTest = require("./Tests/navbarH1CheckTest");
 
 // IMPORT UTILITY
 const runAdditionalChecks = require("./Utility/runAdditionalChecks");
@@ -44,6 +45,9 @@ async function runTests(url, tests) {
   }
   if (tests.includes("navbarTitleCheckTest")) {
     results.navbarPageTitles = await navbarTitleCheckTest(page, tests);
+  }
+  if (tests.includes("navbarH1CheckTest")) {
+    results.navbarH1Check = await navbarH1CheckTest(page, tests);
   }
 
   await browser.close();

@@ -5,8 +5,7 @@
         <div class="flex-column">
           <h2>To-Do:</h2>
           <ul>
-            <li class="big-deal">TESTS DON'T WORK ON TEST SITE??????????????</li>
-            <li>Test to check if each page in the navigation has a h1</li>
+            <li class="big-deal">Attempted to add checkboxes for multiple browsers. The vue app was unable to receive the data for some reason. Spent like 5 hohurs debugging and made no progress. Will come back to this later, when I'm feeling particularly masochistic.</li>
             <li>
               Test to check if each page in the navigation has images with
               non-repeating alt tags
@@ -15,7 +14,6 @@
               Add a time estimating loading page after pressing "Run Tests"
             </li>
             <li>Make the UI not look terrible :D</li>
-            <li>Make checkboxes for different browsers?</li>
           </ul>
         </div>
         <div class="flex-column">
@@ -25,6 +23,8 @@
               Test to check if each page in the navigation has a title
               containing the dealer name - Alec
             </li>
+            <li>Created a test environment - <a href="https://stone-monkey1.github.io/sokal-qa-playground/">Test Site</a> - Alec</li>
+            <li>Test to check if each page in the navigation has a h1 - Alec</li>
           </ul>
         </div>
       </div>

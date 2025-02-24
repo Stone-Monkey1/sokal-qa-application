@@ -1,7 +1,6 @@
 const getNavbarLinks = require("../Utility/getNavbarLinks");
 const runAdditionalChecks = require("../Utility/runAdditionalChecks");
-const getSiteName = require("../Utility/getSiteName"); // ✅ Import the new utility
-
+const getSiteName = require("../Utility/getSiteName");
 async function navbarTitleCheckTest(page, selectedTests) {
   const filteredTitles = {}; // Store only relevant titles
   const links = await getNavbarLinks(page); // Fetch links once
