@@ -17,6 +17,8 @@ app.use(cors());
 
 const executedTests = new Set(); // Global test execution tracker
 
+// ADD NEW TESTS HERE
+
 const testModules = {
   navbarTitleCheckTest,
   navbarH1CheckTest,

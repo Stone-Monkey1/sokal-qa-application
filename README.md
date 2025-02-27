@@ -4,13 +4,13 @@ How to get the project on your computer:
 2. Run "git clone https://github.com/Stone-Monkey1/sokal-qa-application.git"
 3. Go back into the terminal and navigate into the repository you just cloned by typing "cd sokal-qa-application"
 4. Now, you need to download the package dependencies.
-5. while still in your sokal-qa-application file, you'll need to "cd frontend" this navigates into the frontend file.
-6. Once in the frontend file you'll need to run "npm install" this will install all the package dependencies to run the frontend portion of the application.
-7. You'll now need to do the same thing for the backend file.
-8. From the frontend file type "cd .." this will navigate you back to the sokal-qa-application file.
-9. Now, you guessed it, you need to do the same thing in the backend file. From here "cd backend" once in the backend file, run "npm install" to install the backend dependencies.
-10. At this point it's probably wise to open a second terminal, one to control the backend and the other to control the frontend.
-11. Once you're in the correct file, you'll need to type "node server.js" to start the backend application. If done properly you should see "Server running on port 3000" in the terminal.
+5. Run this in the terminal of the root directory, which should be "sokal-qa-application": chmod +x setup.sh
+./setup.sh
+6. This SHOULD download all dependencies required for the frontend and backend.
+7. At this point you should open a second terminal, one to control the backend and the other to control the frontend.
+8. In one terminal cd into the backend by typing "cd backend".
+9. Once you're in the correct file, you'll need to type "node server.js" to start the backend application. If done properly you should see "Server running on port 3000" in the terminal.
+10. You'll also need to open the second terminal you made earlier. cd into the frontend by typing "cd frontend".
 12. To begin the frontend application you'll need to run "npm run serve" in the frontend file to begin the frontend application you'll know it's working if you see "App running at: Local: http://localhost:8080/".
 13. Now, just navigate to that url and you SHOULD see the application :D
 
@@ -18,11 +18,11 @@ Adding Tests:
 
 1. Tests are found in backend > Tests (obviously?)
 2. Feel free to check out the tests that are there to get an idea of how you might make yours.
-3. Once you've added a new test file RESTART THE BACKEND. The node server is not dynamic. You'll need to restart it every time you change things in the backend file to ensure the updates you make actually do something.
+3. Once you've added a new test file or altered the backend at all RESTART THE BACKEND. The node server is not dynamic. You'll need to restart it every time you change things in the backend file to ensure the updates you make actually do something.
 4. Once you've added your test code to the new file you made, you'll need to ensure it's connected properly in the server.js file.
-5. You'll first need to import the file you made so you can reference it, there is a section at the top where you can just copy the format.
-6. Once you've imported your test to the server.js file you'll need to add it to the list of tests to run, which is also in the server.js file. Again, you should be able to just copy the format of the tests that are already present.
-7. Lastly, you'll need to add the test you made to the frontend, so it can be activated. If you have been consistent with how you've been naming your test if should be pretty straightforward to add it to the frontend > src > components > QAForm.vue
+5. You'll first need to import the file you made so you can reference it in server.js, there is a section at the top where you can just copy the format.
+6. Once you've imported your test to the server.js file you'll need to add it to the list of tests to run, which is also in the server.js file. Tests are stored in a const called "testModules"
+7. Lastly, you'll need to add the test you made to the frontend, so it can be called. If you have been consistent with how you've been naming your test if should be pretty straightforward to add it to the frontend > src > components > QAForm.vue
 
 How to add the tests you made to the github repository:
 
