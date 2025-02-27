@@ -19,6 +19,8 @@
         <div class="flex-column">
           <h2>Completed:</h2>
           <ul>
+            <li>Made it so that server.js controlls list of executed and non-executed tests, rather than leaving that to the individual tests. Made the application run exponentially faster.</li>
+            <li>Tests need to be sorted based on the pages with errors, not based on the test - Alec</li>
             <li>
               Test to check if each page in the navigation has a title
               containing the dealer name - Alec

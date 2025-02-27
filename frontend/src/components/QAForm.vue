@@ -23,14 +23,6 @@
       <div class="padding-quarter"></div>
       <div class="flex-column test-checklist">
         <label>
-          <input type="checkbox" value="loadTime" v-model="selectedTests" />
-          Page Load Time
-        </label>
-        <label>
-          <input type="checkbox" value="titleCheck" v-model="selectedTests" />
-          Page Title Check
-        </label>
-        <label>
           <input
             type="checkbox"
             value="navbarTitleCheckTest"
@@ -53,6 +45,14 @@
             v-model="selectedTests"
           />
           Alt Repeat
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="navbarSpellCheckTest"
+            v-model="selectedTests"
+          />
+          Spell Check
         </label>
       </div>
       <div class="padding-1"></div>

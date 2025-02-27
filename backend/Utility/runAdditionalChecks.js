@@ -1,36 +1,53 @@
-const fs = require("fs");
-const path = require("path");
-
-// Store completed tests in a Set
-const completedTests = new Set();
-
-async function runAdditionalChecks(page, selectedTests) {
+async function runAdditionalChecks(
+  page,
+  selectedTests,
+  navbarLinks,
+  executedTests
+) {
   const results = {};
 
-  // Ensure selectedTests is an array (to prevent errors)
-  if (!Array.isArray(selectedTests) || selectedTests.length === 0) {
-    return results; // Return empty object if no additional tests are selected
+  if (!Array.isArray(navbarLinks)) {
+    console.error("Error: navbarLinks is not an array in runAdditionalChecks");
+    return { error: "Invalid navbarLinks data" };
   }
 
-  // Dynamically load all available tests from the `Tests` folder
-  const testsDirectory = require("path").join(__dirname, "../Tests");
-  const availableTests = {};
+  for (const link of navbarLinks) {
+    for (const testName of selectedTests) {
+      const testKey = `${testName}-${link}`;
 
-  fs.readdirSync(testsDirectory).forEach((file) => {
-    if (file.endsWith(".js")) {
-      const testName = file.replace(".js", ""); // Remove .js from filename
-      availableTests[testName] = require(require("path").join(
-        testsDirectory,
-        file
-      )); // Import test
-    }
-  });
+      if (executedTests.has(testKey)) {
+        console.log(`Skipping ${testName} on ${link} (already executed).`);
+        continue;
+      }
 
-  for (const testName of selectedTests) {
-    // Skip tests that have already run on all links
-    if (!completedTests.has(testName) && availableTests[testName]) {
-      results[testName] = await availableTests[testName](page);
-      completedTests.add(testName); // Mark test as completed
+      executedTests.add(testKey);
+      console.log(`Running ${testName} on ${link}`);
+
+      try {
+        const testModule = require(`../Tests/${testName}`);
+        const testResult = await testModule(
+          page,
+          selectedTests,
+          navbarLinks,
+          executedTests
+        );
+
+        if (!results[link]) {
+          results[link] = {};
+        }
+
+        if (testResult && testResult[link]) {
+          results[link] = { ...results[link], ...testResult[link] };
+        } else {
+          console.error(`Test ${testName} did not return results for ${link}`);
+        }
+      } catch (error) {
+        console.error(`Error running ${testName} on ${link}:`, error.message);
+        results[link] = {
+          ...results[link],
+          [testName]: { error: `Error running test: ${error.message}` },
+        };
+      }
     }
   }
 

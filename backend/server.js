@@ -3,55 +3,80 @@ const cors = require("cors");
 const { chromium } = require("playwright");
 
 //  IMPORT TESTS!!
-const loadTimeTest = require("./Tests/loadTimeTest");
-const titleCheckTest = require("./Tests/titleCheckTest");
 const navbarTitleCheckTest = require("./Tests/navbarTitleCheckTest");
 const navbarH1CheckTest = require("./Tests/navbarH1CheckTest");
-const navbarAltTagRepeatTest = require("./Tests/navbarAltTagRepeatTest")
+const navbarAltTagRepeatTest = require("./Tests/navbarAltTagRepeatTest");
+const navbarSpellCheckTest = require("./Tests/navbarSpellCheckTest");
 
 // IMPORT UTILITY
-const runAdditionalChecks = require("./Utility/runAdditionalChecks");
+const getNavbarLinks = require("./Utility/getNavbarLinks");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+const executedTests = new Set(); // Global test execution tracker
+
+const testModules = {
+  navbarTitleCheckTest,
+  navbarH1CheckTest,
+  navbarAltTagRepeatTest,
+  navbarSpellCheckTest,
+};
+
 async function runTests(url, tests) {
   const results = {};
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    userAgent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.110 Safari/537.36",
-  });
+  const context = await browser.newContext();
   const page = await context.newPage();
-
-  // Apply stealth-like JavaScript to evade detection. I tried to asked Carson if this is sus or not, no response yet.
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "webdriver", { get: () => false });
-    Object.defineProperty(navigator, "languages", {
-      get: () => ["en-US", "en"],
-    });
-    Object.defineProperty(navigator, "platform", { get: () => "Win32" });
-  });
 
   await page.goto(url, { timeout: 60000 });
 
-  // ADD TESTS YOU'VE IMPORTED HERE
+  const navbarLinks = await getNavbarLinks(page);
+  if (!Array.isArray(navbarLinks)) {
+    console.error("Error: navbarLinks is not an array");
+    await browser.close();
+    return { error: "Failed to retrieve navbar links" };
+  }
 
-  if (tests.includes("loadTime")) {
-    results.loadTime = await loadTimeTest(page);
-  }
-  if (tests.includes("titleCheck")) {
-    results.title = await titleCheckTest(page);
-  }
-  if (tests.includes("navbarTitleCheckTest")) {
-    results.navbarPageTitles = await navbarTitleCheckTest(page, tests);
-  }
-  if (tests.includes("navbarH1CheckTest")) {
-    results.navbarH1Check = await navbarH1CheckTest(page, tests);
-  }
-  if (tests.includes("navbarAltTagRepeatTest")) {
-    results.navbarAltTagRepeatTest = await navbarAltTagRepeatTest(page, tests);
+  for (const link of navbarLinks) {
+    console.log(`Navigating to: ${link}`);
+    await page.goto(link, { waitUntil: "domcontentloaded", timeout: 30000 });
+
+    if (!results[link]) {
+      results[link] = {};
+    }
+
+    for (const testName of tests) {
+      const testKey = `${testName}-${link}`;
+      if (executedTests.has(testKey)) {
+        console.log(`Skipping ${testName} on ${link} (already executed).`);
+        continue;
+      }
+
+      executedTests.add(testKey);
+      console.log(`Running ${testName} on ${link}`);
+
+      try {
+        const testModule = testModules[testName]; // Get test dynamically
+        if (!testModule) {
+          console.warn(`Test ${testName} not found.`);
+          continue;
+        }
+
+        const result = await testModule(
+          page,
+          tests,
+          navbarLinks,
+          executedTests
+        );
+        if (result && result[link]) {
+          results[link] = { ...results[link], ...result[link] };
+        }
+      } catch (error) {
+        console.error(`Error running ${testName} on ${link}:`, error.message);
+      }
+    }
   }
 
   await browser.close();
@@ -71,6 +96,8 @@ app.post("/run-tests", async (req, res) => {
     const results = await runTests(url, selectedTests);
     console.log("Test results:", results);
     res.json(results);
+    executedTests.clear();
+    console.log("Executed tests cleared.");
   } catch (error) {
     console.error("Server Error:", error);
     res.status(500).json({ error: error.message });
