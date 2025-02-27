@@ -14,14 +14,7 @@
               Add a time estimating loading page after pressing "Run Tests"
             </li>
             <li>Make the UI not look terrible :D</li>
-<<<<<<< HEAD
-            <li>KEV TESING DIS</li>
-            <li>KEV TESING DIS</li>
-            <li>KEV TESING DIS</li>
-            <li>KEV TESING DIS</li>
-=======
             <li>Add a button to copy results</li>
->>>>>>> 20116c6 (Kristen initial commit)
           </ul>
         </div>
         <div class="flex-column">
