@@ -4,12 +4,13 @@ How to get the project on your computer:
 2. Run "git clone https://github.com/Stone-Monkey1/sokal-qa-application.git"
 3. Go back into the terminal and navigate into the repository you just cloned by typing "cd sokal-qa-application"
 4. Now, you need to download the package dependencies.
-5. Run this in the terminal of the root directory, which should be sokal-qa-application: "chmod +x setup.sh && ./setup.sh"
-6. This SHOULD download all dependencies required for the frontend and backend.
-7. At this point you should open a second terminal, one to control the backend and the other to control the frontend.
-8. In one terminal cd into the backend by typing "cd backend".
-9. Once you're in the correct file, you'll need to type "node server.js" to start the backend application. If done properly you should see "Server running on port 3000" in the terminal.
-10. You'll also need to open the second terminal you made earlier. cd into the frontend by typing "cd frontend".
+5. Open the terminal by pressing "ctrl & ~"
+6. Run this in the terminal of the root directory, which should be sokal-qa-application: "chmod +x setup.sh && ./setup.sh"
+7. This SHOULD download all dependencies required for the frontend and backend.
+8. At this point you should open a second terminal, one to control the backend and the other to control the frontend.
+9. In one terminal cd into the backend by typing "cd backend".
+10. Once you're in the correct file, you'll need to type "node server.js" to start the backend application. If done properly you should see "Server running on port 3000" in the terminal.
+11. You'll also need to open the second terminal you made earlier. cd into the frontend by typing "cd frontend".
 12. To begin the frontend application you'll need to run "npm run serve" in the frontend file to begin the frontend application you'll know it's working if you see "App running at: Local: http://localhost:8080/".
 13. Now, just navigate to that url and you SHOULD see the application :D
 14. You can stop a terminal running a script by pressing ctrl & c at the same time.
