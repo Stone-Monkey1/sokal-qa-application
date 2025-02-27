@@ -13,6 +13,7 @@ How to get the project on your computer:
 10. You'll also need to open the second terminal you made earlier. cd into the frontend by typing "cd frontend".
 12. To begin the frontend application you'll need to run "npm run serve" in the frontend file to begin the frontend application you'll know it's working if you see "App running at: Local: http://localhost:8080/".
 13. Now, just navigate to that url and you SHOULD see the application :D
+14. You can stop a terminal running a script by pressing ctrl & c at the same time.
 
 Adding Tests:
 
