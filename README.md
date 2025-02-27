@@ -4,8 +4,7 @@ How to get the project on your computer:
 2. Run "git clone https://github.com/Stone-Monkey1/sokal-qa-application.git"
 3. Go back into the terminal and navigate into the repository you just cloned by typing "cd sokal-qa-application"
 4. Now, you need to download the package dependencies.
-5. Run this in the terminal of the root directory, which should be "sokal-qa-application": chmod +x setup.sh
-./setup.sh
+5. Run this in the terminal of the root directory, which should be "sokal-qa-application": chmod +x setup.sh && ./setup.sh
 6. This SHOULD download all dependencies required for the frontend and backend.
 7. At this point you should open a second terminal, one to control the backend and the other to control the frontend.
 8. In one terminal cd into the backend by typing "cd backend".
