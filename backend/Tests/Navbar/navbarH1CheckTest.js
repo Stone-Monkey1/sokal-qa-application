@@ -10,12 +10,12 @@ async function navbarH1CheckTest(page) {
     return {
       [url]: {
         navbarH1CheckTest:
-          h1Count === 0 ? { error: "Missing <h1>" } : { message: "H1 exists" },
+          h1Count === 0 ? { error: "Missing <h1>" } : { results: "H1 exists" },
       },
     };
   } catch (error) {
-    console.error(`Error loading ${url}:`, error.message);
-    return { [url]: { error: `Error loading page: ${error.message}` } };
+    console.error(`Error loading ${url}:`, error.results);
+    return { [url]: { error: `Error loading page: ${error.results}` } };
   }
 }
 

@@ -1,6 +1,11 @@
 #app p,
 #app li, #app label, #app input {
   font-size: 1.4rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+#app a {
+  font-size: 1.4rem;
 }
 .flex-row {
   display: flex;

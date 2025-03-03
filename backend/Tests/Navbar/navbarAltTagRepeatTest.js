@@ -33,12 +33,12 @@ async function navbarAltTagRepeatTest(page) {
         navbarAltTagRepeatTest:
           repeatedTags.length > 0
             ? { repeatedAltTags: repeatedTags }
-            : { message: "No repeated alt tags" },
+            : { results: "No repeated alt tags" },
       },
     };
   } catch (error) {
-    console.error(`Error loading ${url}:`, error.message);
-    return { [url]: { error: `Error loading page: ${error.message}` } };
+    console.error(`Error loading ${url}:`, error.results);
+    return { [url]: { error: `Error loading page: ${error.results}` } };
   }
 }
 

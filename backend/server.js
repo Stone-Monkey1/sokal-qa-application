@@ -3,10 +3,10 @@ const cors = require("cors");
 const { chromium } = require("playwright");
 
 //  IMPORT TESTS!!
-const navbarTitleCheckTest = require("./Tests/navbarTitleCheckTest");
-const navbarH1CheckTest = require("./Tests/navbarH1CheckTest");
-const navbarAltTagRepeatTest = require("./Tests/navbarAltTagRepeatTest");
-const navbarSpellCheckTest = require("./Tests/navbarSpellCheckTest");
+const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
+const navbarH1CheckTest = require("./Tests/Navbar/navbarH1CheckTest");
+const navbarAltTagRepeatTest = require("./Tests/Navbar/navbarAltTagRepeatTest");
+const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
 
 // IMPORT UTILITY
 const getNavbarLinks = require("./Utility/getNavbarLinks");

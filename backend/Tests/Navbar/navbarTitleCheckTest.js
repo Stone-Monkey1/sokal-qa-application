@@ -1,4 +1,4 @@
-const getSiteName = require("../Utility/getSiteName");
+const getSiteName = require("../../Utility/getSiteName");
 
 let siteNameCache = null;
 
