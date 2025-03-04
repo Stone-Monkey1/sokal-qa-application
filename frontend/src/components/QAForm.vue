@@ -1,15 +1,5 @@
 <template>
   <div class="qa-form">
-    <div class="header padding-5-percent background-grey">
-      <h1>
-        <img
-          class="img-responsive"
-          :src="require('@/assets/sokal-logo.png')"
-          alt="Sokal Logo"
-        />
-        QA Testing Tool
-      </h1>
-    </div>
     <!-- Just adding this to make it easier to test things -->
     <div class="padding-2-percent">
       <a href="https://stone-monkey1.github.io/sokal-qa-playground/"
