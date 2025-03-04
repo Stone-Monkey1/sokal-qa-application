@@ -5,7 +5,8 @@ const { chromium } = require("playwright");
 //  IMPORT TESTS!!
 const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
 const navbarH1CheckTest = require("./Tests/Navbar/navbarH1CheckTest");
-const navbarAltTagRepeatTest = require("./Tests/Navbar/navbarAltTagRepeatTest");
+const navbarImgAltTagRepeatTest = require("./Tests/Navbar/navbarImgAltTagRepeatTest");
+const navbarImgResponsiveTest = require("./Tests/Navbar/navbarImgResponsiveTest");
 const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
 const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
 const homepageQuickLinksTest = require("./Tests/Homepage/homepageQuickLinksTest");
@@ -13,6 +14,7 @@ const homepageTabbedSearchFilterTest = require("./Tests/Homepage/homepageTabbedS
 
 // IMPORT UTILITY
 const getNavbarLinks = require("./Utility/getNavbarLinks");
+const getImages = require("./Utility/getImages");
 
 const app = express();
 app.use(express.json());
@@ -20,13 +22,18 @@ app.use(cors());
 
 const executedTests = new Set(); // Global test execution tracker
 
-
+// Categorize tests
 const navbarTests = {
   navbarTitleCheckTest,
   navbarH1CheckTest,
-  navbarAltTagRepeatTest,
   navbarSpellCheckTest,
   navbarCheckVideo,
+};
+
+// Image-related tests
+const navbarImgTests = {
+  navbarImgAltTagRepeatTest,
+  navbarImgResponsiveTest,
 };
 
 const homepageTests = {
@@ -52,6 +59,11 @@ async function runTests(url, selectedTests) {
   }
 
   const allPages = [url, ...navbarLinks]; // Include homepage in navbar test pages
+
+  // Check if any image-related tests are selected
+  const imageTestsSelected = Object.keys(navbarImgTests).some((test) =>
+    selectedTests.includes(test)
+  );
 
   // Run Homepage Tests (ONLY on the homepage)
   results[url] = {};
@@ -81,32 +93,38 @@ async function runTests(url, selectedTests) {
       results[link] = {};
     }
 
+    // Fetch images **only if needed**
+    let images = null;
+    if (imageTestsSelected) {
+      images = await getImages(page);
+    }
+
     for (const testName of selectedTests) {
-      if (navbarTests[testName]) {
-        const testKey = `${testName}-${link}`;
-        if (executedTests.has(testKey)) {
-          console.log(`Skipping ${testName} on ${link} (already executed).`);
-          continue;
+      const testKey = `${testName}-${link}`;
+      if (executedTests.has(testKey)) {
+        console.log(`Skipping ${testName} on ${link} (already executed).`);
+        continue;
+      }
+
+      executedTests.add(testKey);
+      console.log(`Running ${testName} on ${link}`);
+
+      try {
+        let result;
+
+        if (navbarTests[testName]) {
+          // Run normal navbar tests
+          result = await navbarTests[testName](page);
+        } else if (navbarImgTests[testName]) {
+          // Run image-related tests with `images` parameter
+          result = await navbarImgTests[testName](page, images);
         }
 
-        executedTests.add(testKey);
-        console.log(`Running ${testName} on ${link}`);
-
-        try {
-          const testModule = navbarTests[testName];
-          const result = await testModule(
-            page,
-            selectedTests,
-            navbarLinks,
-            executedTests
-          );
-
-          if (result && result[link]) {
-            results[link] = { ...results[link], ...result[link] };
-          }
-        } catch (error) {
-          console.error(`Error running ${testName} on ${link}:`, error.message);
+        if (result && result[link]) {
+          results[link] = { ...results[link], ...result[link] };
         }
+      } catch (error) {
+        console.error(`Error running ${testName} on ${link}:`, error.message);
       }
     }
   }

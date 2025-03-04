@@ -37,10 +37,18 @@
         <label>
           <input
             type="checkbox"
-            value="navbarAltTagRepeatTest"
+            value="navbarImgAltTagRepeatTest"
             v-model="selectedTests"
           />
           Alt Repeat
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="navbarImgResponsiveTest"
+            v-model="selectedTests"
+          />
+          Img Responsive
         </label>
         <label>
           <input
