@@ -7,6 +7,9 @@ const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
 const navbarH1CheckTest = require("./Tests/Navbar/navbarH1CheckTest");
 const navbarAltTagRepeatTest = require("./Tests/Navbar/navbarAltTagRepeatTest");
 const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
+const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
+const homepageQuickLinksTest = require("./Tests/Homepage/homepageQuickLinksTest");
+const homepageTabbedSearchFilterTest = require("./Tests/Homepage/homepageTabbedSearchFilterTest");
 
 // IMPORT UTILITY
 const getNavbarLinks = require("./Utility/getNavbarLinks");
@@ -17,23 +20,30 @@ app.use(cors());
 
 const executedTests = new Set(); // Global test execution tracker
 
-// ADD NEW TESTS HERE
 
-const testModules = {
+const navbarTests = {
   navbarTitleCheckTest,
   navbarH1CheckTest,
   navbarAltTagRepeatTest,
   navbarSpellCheckTest,
+  navbarCheckVideo,
 };
 
-async function runTests(url, tests) {
+const homepageTests = {
+  homepageQuickLinksTest,
+  homepageTabbedSearchFilterTest,
+};
+
+async function runTests(url, selectedTests) {
   const results = {};
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
 
+  console.log(`Navigating to homepage: ${url}`);
   await page.goto(url, { timeout: 60000 });
 
+  // Get navbar links
   const navbarLinks = await getNavbarLinks(page);
   if (!Array.isArray(navbarLinks)) {
     console.error("Error: navbarLinks is not an array");
@@ -41,7 +51,29 @@ async function runTests(url, tests) {
     return { error: "Failed to retrieve navbar links" };
   }
 
-  for (const link of navbarLinks) {
+  const allPages = [url, ...navbarLinks]; // Include homepage in navbar test pages
+
+  // Run Homepage Tests (ONLY on the homepage)
+  results[url] = {};
+  for (const testName of selectedTests) {
+    if (homepageTests[testName]) {
+      console.log(`Running homepage test: ${testName} on ${url}`);
+
+      try {
+        const testModule = homepageTests[testName];
+        const result = await testModule(page);
+
+        if (result) {
+          results[url] = { ...results[url], ...result[url] };
+        }
+      } catch (error) {
+        console.error(`Error running ${testName} on homepage:`, error.message);
+      }
+    }
+  }
+
+  // Run Navbar Tests (on homepage + all navbar links)
+  for (const link of allPages) {
     console.log(`Navigating to: ${link}`);
     await page.goto(link, { waitUntil: "domcontentloaded", timeout: 30000 });
 
@@ -49,34 +81,32 @@ async function runTests(url, tests) {
       results[link] = {};
     }
 
-    for (const testName of tests) {
-      const testKey = `${testName}-${link}`;
-      if (executedTests.has(testKey)) {
-        console.log(`Skipping ${testName} on ${link} (already executed).`);
-        continue;
-      }
-
-      executedTests.add(testKey);
-      console.log(`Running ${testName} on ${link}`);
-
-      try {
-        const testModule = testModules[testName]; // Get test dynamically
-        if (!testModule) {
-          console.warn(`Test ${testName} not found.`);
+    for (const testName of selectedTests) {
+      if (navbarTests[testName]) {
+        const testKey = `${testName}-${link}`;
+        if (executedTests.has(testKey)) {
+          console.log(`Skipping ${testName} on ${link} (already executed).`);
           continue;
         }
 
-        const result = await testModule(
-          page,
-          tests,
-          navbarLinks,
-          executedTests
-        );
-        if (result && result[link]) {
-          results[link] = { ...results[link], ...result[link] };
+        executedTests.add(testKey);
+        console.log(`Running ${testName} on ${link}`);
+
+        try {
+          const testModule = navbarTests[testName];
+          const result = await testModule(
+            page,
+            selectedTests,
+            navbarLinks,
+            executedTests
+          );
+
+          if (result && result[link]) {
+            results[link] = { ...results[link], ...result[link] };
+          }
+        } catch (error) {
+          console.error(`Error running ${testName} on ${link}:`, error.message);
         }
-      } catch (error) {
-        console.error(`Error running ${testName} on ${link}:`, error.message);
       }
     }
   }

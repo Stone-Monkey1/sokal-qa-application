@@ -10,6 +10,12 @@
         QA Testing Tool
       </h1>
     </div>
+    <!-- Just adding this to make it easier to test things -->
+    <div class="padding-2-percent">
+      <a href="https://stone-monkey1.github.io/sokal-qa-playground/"
+        >https://stone-monkey1.github.io/sokal-qa-playground/</a
+      >
+    </div>
     <div class="padding-5-percent">
       <label for="url">Website Homepage URL:</label>
       <input
@@ -53,6 +59,30 @@
             v-model="selectedTests"
           />
           Spell Check
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="navbarCheckVideo"
+            v-model="selectedTests"
+          />
+          Check for Videos
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="homepageTabbedSearchFilterTest"
+            v-model="selectedTests"
+          />
+          Check for 7.09% Excellent Credit tooltip
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="homepageQuickLinksTest"
+            v-model="selectedTests"
+          />
+          Check Homepage Quick Links
         </label>
       </div>
       <div class="padding-1"></div>

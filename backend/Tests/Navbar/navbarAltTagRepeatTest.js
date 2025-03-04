@@ -28,14 +28,9 @@ async function navbarAltTagRepeatTest(page) {
         : `No repeated alt tags found on ${url}`
     );
 
-    return {
-      [url]: {
-        navbarAltTagRepeatTest:
-          repeatedTags.length > 0
-            ? { repeatedAltTags: repeatedTags }
-            : { results: "No repeated alt tags" },
-      },
-    };
+    return repeatedTags.length > 0
+      ? { [url]: { navbarAltTagRepeatTest: { repeatedAltTags: repeatedTags } } }
+      : null;
   } catch (error) {
     console.error(`Error loading ${url}:`, error.results);
     return { [url]: { error: `Error loading page: ${error.results}` } };

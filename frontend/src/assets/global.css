@@ -103,9 +103,9 @@
 }
 .flex-li--key {
   margin-right: 6px;
-  width: 15%;
+  min-width: 15%;
   flex-shrink: 0;
-  color: #f5f5f5;
+  color: black;
 }
 .flex-li--key:has(.success-msg) {
   background-color: #6cc133;

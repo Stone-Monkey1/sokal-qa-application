@@ -15,17 +15,7 @@
               Add a time estimating loading page after pressing "Run Tests"
             </li>
             <li>Make the UI not look terrible :D</li>
-            <li>
-              Need to create diffrent logic for homepage tests and navbar tests,
-              since the homepage test doesn't need to run on multiple pages,
-              only the one put in the url space
-            </li>
-            <li>Need to make some homepage components to test</li>
             <li>Need to start working on homepage components</li>
-            <li>
-              Test to see if an iframe url contains vimeo or youtube in order to
-              test the video on the page.
-            </li>
           </ul>
         </div>
         <div class="flex-column">
@@ -59,6 +49,16 @@
               non-repeating alt tags - Alec
             </li>
             <li>Add a button to copy results - Alec</li>
+            <li>Need to make some homepage components to test - Chris</li>
+            <li>
+              Test to see if an iframe url contains vimeo or youtube in order to
+              test the video on the page. - Alec
+            </li>
+            <li>
+              Created diffrent logic for homepage tests and navbar tests,
+              since the homepage test doesn't need to run on multiple pages,
+              only the one put in the url space - Alec
+            </li>
           </ul>
         </div>
       </div>
