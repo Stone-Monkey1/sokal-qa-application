@@ -40,8 +40,14 @@
             >
               <h4>{{ testName }}</h4>
               <ul v-if="typeof testData === 'object' && testData !== null">
-                <li v-for="(value, key) in testData" :key="key">
-                  <strong>{{ key }}:</strong> {{ value }}
+                <li class="flex-li" v-for="(value, key) in testData" :key="key">
+                  <div class="flex-li--key">
+                    <strong :class="getClassForKey(key)" v-if="key === 'h1TextContentList'">H1 Tags:</strong>
+                    <strong :class="getClassForKey(key)" v-else>{{ key }}</strong>
+                  </div>
+                  <div class="flex-li--value">
+                    <span vhtml="value">{{ value }} </span>
+                  </div>
                 </li>
               </ul>
               <p v-else>{{ testData }}</p>
@@ -112,6 +118,14 @@ export default {
         return false;
       });
     },
+    getClassForKey(key) {
+      if (key.toLowerCase().includes("results")) return "success-msg";
+      if (key.toLowerCase().includes("warning")) return "warning-msg";
+      if (key.toLowerCase().includes("h1textcontentlist")) return "warning-instances-msg";
+      if (key.toLowerCase().includes("resolution")) return "resolution-msg";
+      if (key.toLowerCase().includes("error")) return "error-msg";
+      return "";
+    }
   },
   mounted() {
     // Automatically open URLs with no issues
