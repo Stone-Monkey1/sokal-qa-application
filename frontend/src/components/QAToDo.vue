@@ -16,11 +16,16 @@
             </li>
             <li>Make the UI not look terrible :D</li>
             <li>Need to start working on homepage components</li>
+            <li>Bug: Homepage tests still run on every page</li>
           </ul>
         </div>
         <div class="flex-column">
           <h2>Completed:</h2>
           <ul>
+            <li>
+              Fixed Bug: Some tests don't trigger the frontend function that
+              marks pages as free from error
+            </li>
             <li>
               Made it so that server.js controlls list of executed and
               non-executed tests, rather than leaving that to the individual
@@ -55,9 +60,9 @@
               test the video on the page. - Alec
             </li>
             <li>
-              Created diffrent logic for homepage tests and navbar tests,
-              since the homepage test doesn't need to run on multiple pages,
-              only the one put in the url space - Alec
+              Created diffrent logic for homepage tests and navbar tests, since
+              the homepage test doesn't need to run on multiple pages, only the
+              one put in the url space - Alec
             </li>
           </ul>
         </div>

@@ -1,8 +1,9 @@
 async function homepageTabbedSearchFilterTest(page) {
+  const tabbedSearchFilter = await page
+    .locator(".vehicle-type-display")
+    .count();
 
-  const tabbedSearchComponent = await page.locator(".tabbed-filter-content").count();
-
-  if (tabbedSearchComponent === 0) {
+  if (tabbedSearchFilter === 0) {
     console.log("Tabbed Search not on Homepage");
     return { error: "Tabbed Search not on Homepage" };
   }

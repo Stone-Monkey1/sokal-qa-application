@@ -11,6 +11,7 @@ const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
 const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
 const homepageQuickLinksTest = require("./Tests/Homepage/homepageQuickLinksTest");
 const homepageTabbedSearchFilterTest = require("./Tests/Homepage/homepageTabbedSearchFilterTest");
+const homepageVehicleCarouselTest = require("./Tests/Homepage/homepageVehicleCarouselTest");
 
 // IMPORT UTILITY
 const getNavbarLinks = require("./Utility/getNavbarLinks");
@@ -39,6 +40,7 @@ const navbarImgTests = {
 const homepageTests = {
   homepageQuickLinksTest,
   homepageTabbedSearchFilterTest,
+  homepageVehicleCarouselTest,
 };
 
 async function runTests(url, selectedTests) {
@@ -60,7 +62,10 @@ async function runTests(url, selectedTests) {
 
   const allPages = [url, ...navbarLinks]; // Include homepage in navbar test pages
 
-  // Check if any image-related tests are selected
+  // Check if any navbar-related tests are selected
+  const navbarTestsSelected = Object.keys(navbarTests).some((test) =>
+    selectedTests.includes(test)
+  );
   const imageTestsSelected = Object.keys(navbarImgTests).some((test) =>
     selectedTests.includes(test)
   );
@@ -84,49 +89,61 @@ async function runTests(url, selectedTests) {
     }
   }
 
-  // Run Navbar Tests (on homepage + all navbar links)
-  for (const link of allPages) {
-    console.log(`Navigating to: ${link}`);
-    await page.goto(link, { waitUntil: "domcontentloaded", timeout: 30000 });
+  // 🚨 **Only loop through other pages if navbar-related tests are selected**
+  if (navbarTestsSelected || imageTestsSelected) {
+    for (const link of allPages) {
+      if (link !== url) {
+        console.log(`Navigating to: ${link}`);
+        await page.goto(link, {
+          waitUntil: "domcontentloaded",
+          timeout: 30000,
+        });
 
-    if (!results[link]) {
-      results[link] = {};
-    }
-
-    // Fetch images **only if needed**
-    let images = null;
-    if (imageTestsSelected) {
-      images = await getImages(page);
-    }
-
-    for (const testName of selectedTests) {
-      const testKey = `${testName}-${link}`;
-      if (executedTests.has(testKey)) {
-        console.log(`Skipping ${testName} on ${link} (already executed).`);
-        continue;
-      }
-
-      executedTests.add(testKey);
-      console.log(`Running ${testName} on ${link}`);
-
-      try {
-        let result;
-
-        if (navbarTests[testName]) {
-          // Run normal navbar tests
-          result = await navbarTests[testName](page);
-        } else if (navbarImgTests[testName]) {
-          // Run image-related tests with `images` parameter
-          result = await navbarImgTests[testName](page, images);
+        if (!results[link]) {
+          results[link] = {};
         }
 
-        if (result && result[link]) {
-          results[link] = { ...results[link], ...result[link] };
+        let images = null;
+        if (imageTestsSelected) {
+          images = await getImages(page);
         }
-      } catch (error) {
-        console.error(`Error running ${testName} on ${link}:`, error.message);
+
+        for (const testName of selectedTests) {
+          if (homepageTests[testName]) continue; // 🔥 Skip homepage tests on non-homepage pages
+
+          const testKey = `${testName}-${link}`;
+          if (executedTests.has(testKey)) {
+            console.log(`Skipping ${testName} on ${link} (already executed).`);
+            continue;
+          }
+
+          executedTests.add(testKey);
+          console.log(`Running ${testName} on ${link}`);
+
+          try {
+            let result;
+            if (navbarTests[testName]) {
+              result = await navbarTests[testName](page);
+            } else if (navbarImgTests[testName]) {
+              result = await navbarImgTests[testName](page, images);
+            }
+
+            if (result && result[link]) {
+              results[link] = { ...results[link], ...result[link] };
+            }
+          } catch (error) {
+            console.error(
+              `Error running ${testName} on ${link}:`,
+              error.message
+            );
+          }
+        }
       }
     }
+  } else {
+    console.log(
+      `Skipping navbar page navigation since only homepage tests were selected.`
+    );
   }
 
   await browser.close();

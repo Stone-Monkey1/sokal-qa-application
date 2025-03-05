@@ -82,6 +82,14 @@
           />
           Check Homepage Quick Links
         </label>
+        <label>
+          <input
+            type="checkbox"
+            value="homepageVehicleCarouselTest"
+            v-model="selectedTests"
+          />
+          Vehicle Carousel
+        </label>
       </div>
       <div class="padding-1"></div>
       <button @click="submitTests">Run Tests</button>

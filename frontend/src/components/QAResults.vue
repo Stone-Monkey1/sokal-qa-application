@@ -2,8 +2,13 @@
   <div class="results">
     <h2>Results:</h2>
     <div class="results-buttons flex-row">
-      <button @click="copyToClipboard" class="copy-btn results-btn flex-column">Copy JSON</button>
-      <button @click="toggleAllAccordions" class="accordion-open-button results-btn">
+      <button @click="copyToClipboard" class="copy-btn results-btn flex-column">
+        Copy JSON
+      </button>
+      <button
+        @click="toggleAllAccordions"
+        class="accordion-open-button results-btn"
+      >
         {{ allAccordionsOpen ? "Close All" : "Open All" }}
       </button>
     </div>
@@ -42,11 +47,22 @@
               <ul v-if="typeof testData === 'object' && testData !== null">
                 <li class="flex-li" v-for="(value, key) in testData" :key="key">
                   <div class="flex-li--key">
-                    <strong :class="getClassForKey(key)" v-if="key === 'h1TextContentList'">H1 Tags:</strong>
-                    <strong :class="getClassForKey(key)" v-else>{{ key }}</strong>
+                    <strong
+                      :class="getClassForKey(key)"
+                      v-if="key === 'h1TextContentList'"
+                      >H1 Tags:</strong
+                    >
+                    <strong :class="getClassForKey(key)" v-else>{{
+                      key
+                    }}</strong>
                   </div>
                   <div class="flex-li--value">
-                    <span vhtml="value">{{ value }} </span>
+                    <ul v-if="Array.isArray(value)">
+                      <li v-for="(error, index) in value" :key="index">
+                        {{ error }}
+                      </li>
+                    </ul>
+                    <span v-else>{{ value }}</span>
                   </div>
                 </li>
               </ul>
@@ -106,14 +122,17 @@ export default {
       }
     },
     hasIssues(tests) {
-      // Check if any test contains an error or message other than "No issues found"
       return Object.values(tests).some((test) => {
         if (typeof test === "object" && test !== null) {
-          return Object.values(test).some(
-            (value) =>
-              typeof value === "string" &&
-              !value.toLowerCase().includes("no issues found")
-          );
+          return Object.values(test).some((value) => {
+            if (typeof value === "string") {
+              return !value.toLowerCase().includes("no issues found");
+            }
+            if (Array.isArray(value)) {
+              return value.length > 0; // Check if array contains any errors
+            }
+            return false;
+          });
         }
         return false;
       });
@@ -121,11 +140,12 @@ export default {
     getClassForKey(key) {
       if (key.toLowerCase().includes("results")) return "success-msg";
       if (key.toLowerCase().includes("warning")) return "warning-msg";
-      if (key.toLowerCase().includes("h1textcontentlist")) return "warning-instances-msg";
+      if (key.toLowerCase().includes("h1textcontentlist"))
+        return "warning-instances-msg";
       if (key.toLowerCase().includes("resolution")) return "resolution-msg";
       if (key.toLowerCase().includes("error")) return "error-msg";
       return "";
-    }
+    },
   },
   mounted() {
     // Automatically open URLs with no issues
