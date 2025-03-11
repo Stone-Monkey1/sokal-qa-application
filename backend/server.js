@@ -5,13 +5,14 @@ const { chromium } = require("playwright");
 //  IMPORT TESTS!!
 const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
 const navbarH1CheckTest = require("./Tests/Navbar/navbarH1CheckTest");
-const navbarImgAltTagRepeatTest = require("./Tests/Navbar/navbarImgAltTagRepeatTest");
+const navbarImgAltTagTest = require("./Tests/Navbar/navbarImgAltTagTest");
 const navbarImgResponsiveTest = require("./Tests/Navbar/navbarImgResponsiveTest");
 const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
 const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
 const homepageQuickLinksTest = require("./Tests/Homepage/homepageQuickLinksTest");
 const homepageTabbedSearchFilterTest = require("./Tests/Homepage/homepageTabbedSearchFilterTest");
 const homepageVehicleCarouselTest = require("./Tests/Homepage/homepageVehicleCarouselTest");
+const homepageInteractionBarTest = require("./Tests/Homepage/homepageInteractionBarTest");
 
 // IMPORT UTILITY
 const getNavbarLinks = require("./Utility/getNavbarLinks");
@@ -33,7 +34,7 @@ const navbarTests = {
 
 // Image-related tests
 const navbarImgTests = {
-  navbarImgAltTagRepeatTest,
+  navbarImgAltTagTest,
   navbarImgResponsiveTest,
 };
 
@@ -41,6 +42,7 @@ const homepageTests = {
   homepageQuickLinksTest,
   homepageTabbedSearchFilterTest,
   homepageVehicleCarouselTest,
+  homepageInteractionBarTest,
 };
 
 async function runTests(url, selectedTests) {
@@ -92,51 +94,46 @@ async function runTests(url, selectedTests) {
   // 🚨 **Only loop through other pages if navbar-related tests are selected**
   if (navbarTestsSelected || imageTestsSelected) {
     for (const link of allPages) {
-      if (link !== url) {
-        console.log(`Navigating to: ${link}`);
-        await page.goto(link, {
-          waitUntil: "domcontentloaded",
-          timeout: 30000,
-        });
+      console.log(`Navigating to: ${link}`);
+      await page.goto(link, {
+        waitUntil: "domcontentloaded",
+        timeout: 30000,
+      });
 
-        if (!results[link]) {
-          results[link] = {};
+      if (!results[link]) {
+        results[link] = {};
+      }
+
+      let images = null;
+      if (imageTestsSelected) {
+        images = await getImages(page);
+      }
+
+      for (const testName of selectedTests) {
+        if (homepageTests[testName]) continue; // 🔥 Skip homepage tests on non-homepage pages
+
+        const testKey = `${testName}-${link}`;
+        if (executedTests.has(testKey)) {
+          console.log(`Skipping ${testName} on ${link} (already executed).`);
+          continue;
         }
 
-        let images = null;
-        if (imageTestsSelected) {
-          images = await getImages(page);
-        }
+        executedTests.add(testKey);
+        console.log(`Running ${testName} on ${link}`);
 
-        for (const testName of selectedTests) {
-          if (homepageTests[testName]) continue; // 🔥 Skip homepage tests on non-homepage pages
-
-          const testKey = `${testName}-${link}`;
-          if (executedTests.has(testKey)) {
-            console.log(`Skipping ${testName} on ${link} (already executed).`);
-            continue;
+        try {
+          let result;
+          if (navbarTests[testName]) {
+            result = await navbarTests[testName](page);
+          } else if (navbarImgTests[testName]) {
+            result = await navbarImgTests[testName](page, images);
           }
 
-          executedTests.add(testKey);
-          console.log(`Running ${testName} on ${link}`);
-
-          try {
-            let result;
-            if (navbarTests[testName]) {
-              result = await navbarTests[testName](page);
-            } else if (navbarImgTests[testName]) {
-              result = await navbarImgTests[testName](page, images);
-            }
-
-            if (result && result[link]) {
-              results[link] = { ...results[link], ...result[link] };
-            }
-          } catch (error) {
-            console.error(
-              `Error running ${testName} on ${link}:`,
-              error.message
-            );
+          if (result && result[link]) {
+            results[link] = { ...results[link], ...result[link] };
           }
+        } catch (error) {
+          console.error(`Error running ${testName} on ${link}:`, error.message);
         }
       }
     }

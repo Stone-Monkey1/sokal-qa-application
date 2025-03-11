@@ -37,10 +37,10 @@
         <label>
           <input
             type="checkbox"
-            value="navbarImgAltTagRepeatTest"
+            value="navbarImgAltTagTest"
             v-model="selectedTests"
           />
-          Alt Repeat
+          Alt Tags
         </label>
         <label>
           <input
@@ -89,6 +89,14 @@
             v-model="selectedTests"
           />
           Vehicle Carousel
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="homepageInteractionBarTest"
+            v-model="selectedTests"
+          />
+          Interaction Bar
         </label>
       </div>
       <div class="padding-1"></div>
