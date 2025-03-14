@@ -64,8 +64,10 @@ async function runTests(url, selectedTests) {
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
     bypassCSP: true,
     ignoreHTTPSErrors: true,
-    storageState: null,
   });
+  await context.clearCookies();
+  await context.clearPermissions();
+
   const page = await context.newPage();
 
   console.log(`Navigating to homepage: ${url}`);
