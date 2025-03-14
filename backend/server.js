@@ -48,7 +48,10 @@ const homepageTests = {
 async function runTests(url, selectedTests) {
   const results = {};
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+  });
   const page = await context.newPage();
 
   console.log(`Navigating to homepage: ${url}`);

@@ -2,7 +2,7 @@ async function navbarCheckVideo(page) {
   const url = page.url();
 
   try {
-    await page.waitForSelector("iframe", { timeout: 5000 }).catch(() => {}); // Prevent test failures if no iframe exists
+    await page.waitForSelector("iframe", { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(800); // Extra wait for lazy-loaded content
 
     console.log(`Checking for video iframes on ${url}`);

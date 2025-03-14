@@ -5,7 +5,18 @@ async function getNavbarLinks(page) {
 
   const links = await page.evaluate(() => {
     const navLinks = document.querySelectorAll(".navbar .navbar-nav a");
-    const hrefs = [...new Set([...navLinks].map((link) => link.href.trim()))];
+    const excludedKeywords = [
+      "newvehicles",
+      "preownedvehicles",
+      "new-vehicles",
+      "pre-owned-vehicles",
+      "used-vehicles",
+      "vehicles?"
+    ];
+    let hrefs = [...new Set([...navLinks].map((link) => link.href.trim()))];
+    hrefs = hrefs.filter(
+      (href) => !excludedKeywords.some((keyword) => href.includes(keyword))
+    );
     return hrefs.filter((href) => href && !href.startsWith("#")); // Remove empty & anchor links
   });
 

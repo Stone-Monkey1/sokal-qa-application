@@ -66,7 +66,8 @@ async function homepageVehicleCarouselTest(page) {
       // Ensure URL routes to new vehicles
       if (
         !vehicleUrl.includes("newvehicles") &&
-        !vehicleUrl.includes("new-vehicles")
+        !vehicleUrl.includes("new-vehicles") &&
+        !vehicleUrl.includes("new-true")
       ) {
         if (!vehicleErrors[vehicleName]) {
           vehicleErrors[vehicleName] = [];
