@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: playwright-backend
+    env: docker
+    plan: free
+    branch: main
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 3000
