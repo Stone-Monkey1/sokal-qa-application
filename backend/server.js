@@ -20,7 +20,12 @@ const getImages = require("./Utility/getImages");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: "https://stone-monkey1.github.io/sokal-qa-application/",
+  methods: "GET,POST,OPTIONS",
+  allowedHeaders: "Content-Type",
+};
+app.use(cors(corsOptions));
 
 const executedTests = new Set(); // Global test execution tracker
 
@@ -94,7 +99,7 @@ async function runTests(url, selectedTests) {
     }
   }
 
-  // 🚨 **Only loop through other pages if navbar-related tests are selected**
+  // Only loop through other pages if navbar-related tests are selected
   if (navbarTestsSelected || imageTestsSelected) {
     for (const link of allPages) {
       console.log(`Navigating to: ${link}`);
