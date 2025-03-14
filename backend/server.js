@@ -56,10 +56,7 @@ async function runTests(url, selectedTests) {
   const results = {};
   const browser = await chromium.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"], // ✅ Prevent permission errors
-    executablePath: process.env.PLAYWRIGHT_BROWSERS_PATH
-      ? `${process.env.PLAYWRIGHT_BROWSERS_PATH}/chromium`
-      : undefined,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   const context = await browser.newContext({

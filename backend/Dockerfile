@@ -1,10 +1,8 @@
-FROM mcr.microsoft.com/playwright:focal
+# Use Playwright's official Docker image (comes with all required dependencies)
+FROM mcr.microsoft.com/playwright:v1.40.0-jammy
 
 # Set working directory
 WORKDIR /app
-
-# Ensure required system packages are installed (fixes permission issues)
-RUN apt-get update && apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 libgtk-3-0 libx11-xcb1
 
 # Copy package files and install dependencies
 COPY package.json package-lock.json ./
@@ -13,8 +11,8 @@ RUN npm install
 # Copy the rest of the backend files
 COPY . .
 
-# Ensure Playwright browsers have execution permissions
-RUN chmod -R 777 /ms-playwright
+# Install Playwright browsers (fixes missing Chromium issue)
+RUN npx playwright install --with-deps chromium
 
 # Expose the port Render assigns dynamically
 EXPOSE 3000
