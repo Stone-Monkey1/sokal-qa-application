@@ -62,11 +62,18 @@ async function runTests(url, selectedTests) {
   const context = await browser.newContext({
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+    bypassCSP: true,
+    ignoreHTTPSErrors: true,
+    storageState: null,
   });
   const page = await context.newPage();
 
   console.log(`Navigating to homepage: ${url}`);
-  await page.goto(url, { timeout: 60000 });
+  await page.goto(url, {
+    timeout: 60000,
+    waitUntil: "networkidle", // Ensures full page load
+    noCache: true, // Forces a fresh fetch (not always honored)
+  });
 
   // Get navbar links
   const navbarLinks = await getNavbarLinks(page);
@@ -157,6 +164,7 @@ async function runTests(url, selectedTests) {
     );
   }
 
+  results[url] = {};
   await browser.close();
   return results;
 }
