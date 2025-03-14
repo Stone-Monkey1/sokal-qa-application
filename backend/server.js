@@ -20,8 +20,9 @@ const getImages = require("./Utility/getImages");
 
 const app = express();
 app.use(express.json());
+
 const corsOptions = {
-  origin: "https://stone-monkey1.github.io/sokal-qa-application/",
+  origin: "https://stone-monkey1.github.io/sokal-qa-application",
   methods: "GET,POST,OPTIONS",
   allowedHeaders: "Content-Type",
 };
