@@ -4,12 +4,12 @@
     <transition name="slide">
       <div v-if="showToDo" class="to-do-panel" @click.stop>
         <button class="close-btn" @click="toggleToDo">✖ Close</button>
-        <QAToDo/>
+        <QAToDo />
       </div>
     </transition>
     <div class="container">
       <QAForm @run-tests="runTests" />
-      <QAResults v-if="results" :results="results"/>
+      <QAResults v-if="results" :results="results" />
     </div>
     <div class="git-push-test-section">
       <p>Testing testing testing</p>
@@ -28,7 +28,7 @@ export default {
     QAForm,
     QAHeader,
     QAResults,
-    QAToDo
+    QAToDo,
   },
   data() {
     return {
@@ -39,11 +39,14 @@ export default {
   methods: {
     async runTests({ url, selectedTests }) {
       try {
-        const response = await fetch("http://localhost:3000/run-tests", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, selectedTests }),
-        });
+        const response = await fetch(
+          `${process.env.VUE_APP_API_URL}/run-tests`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, selectedTests }),
+          }
+        );
 
         this.results = await response.json();
       } catch (error) {
@@ -66,7 +69,7 @@ export default {
 };
 </script>
 <style>
- .git-push-test-section {
+.git-push-test-section {
   background-color: #2b2b2b;
   color: #eeeeee;
   padding: 24px;
@@ -74,10 +77,9 @@ export default {
   font-weight: light;
   width: 100%;
   border: 1px solid #000000;
- }
+}
 
-
- /* To Do Sliding Panel to hide To Do Tasks */
+/* To Do Sliding Panel to hide To Do Tasks */
 /* .to-do-panel {
   background-color: white;
   width: 100%;
