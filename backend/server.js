@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { chromium } = require("playwright");
+const stealth = require("playwright-extra-plugin-stealth");
 
 //  IMPORT TESTS!!
 const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
@@ -18,6 +19,7 @@ const homepageInteractionBarTest = require("./Tests/Homepage/homepageInteraction
 const getNavbarLinks = require("./Utility/getNavbarLinks");
 const getImages = require("./Utility/getImages");
 
+chromium.use(stealth());
 const app = express();
 app.use(express.json());
 
@@ -62,6 +64,12 @@ async function runTests(url, selectedTests) {
   const context = await browser.newContext({
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+    viewport: { width: 1280, height: 800 }, // Mimic a real screen size
+    deviceScaleFactor: 1,
+    isMobile: false,
+    hasTouch: false,
+    locale: "en-US",
+    timezoneId: "America/New_York",
     bypassCSP: true,
     ignoreHTTPSErrors: true,
   });
