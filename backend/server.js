@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const { chromium } = require("playwright");
-const stealth = require("playwright-extra-plugin-stealth");
 
 //  IMPORT TESTS!!
 const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
@@ -19,7 +18,6 @@ const homepageInteractionBarTest = require("./Tests/Homepage/homepageInteraction
 const getNavbarLinks = require("./Utility/getNavbarLinks");
 const getImages = require("./Utility/getImages");
 
-chromium.use(stealth());
 const app = express();
 app.use(express.json());
 
@@ -30,6 +28,29 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+
+// ✅ Function to apply stealth-like settings
+async function applyStealth(page) {
+  await page.evaluateOnNewDocument(() => {
+    // Remove Playwright detection
+    Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+
+    // Spoof Chrome's features
+    window.navigator.chrome = { runtime: {} };
+
+    // Fake permissions API
+    const originalQuery = navigator.permissions.query;
+    navigator.permissions.query = (parameters) =>
+      parameters.name === "notifications"
+        ? Promise.resolve({ state: "granted" })
+        : originalQuery(parameters);
+
+    // Set proper user agent and language
+    Object.defineProperty(navigator, "languages", {
+      get: () => ["en-US", "en"],
+    });
+  });
+}
 
 const executedTests = new Set(); // Global test execution tracker
 
@@ -77,6 +98,8 @@ async function runTests(url, selectedTests) {
   await context.clearPermissions();
 
   const page = await context.newPage();
+  await applyStealth(page); 
+  
 
   console.log(`Navigating to homepage: ${url}`);
   await page.goto(url, {
