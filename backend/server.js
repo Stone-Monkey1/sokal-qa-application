@@ -29,9 +29,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// ✅ Function to apply stealth-like settings
-async function applyStealth(page) {
-  await page.evaluateOnNewDocument(() => {
+async function applyStealth(context) {
+  await context.addInitScript(() => {
     // Remove Playwright detection
     Object.defineProperty(navigator, "webdriver", { get: () => undefined });
 
@@ -97,9 +96,8 @@ async function runTests(url, selectedTests) {
   await context.clearCookies();
   await context.clearPermissions();
 
+  await applyStealth(context);
   const page = await context.newPage();
-  await applyStealth(page); 
-  
 
   console.log(`Navigating to homepage: ${url}`);
   await page.goto(url, {
