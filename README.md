@@ -42,4 +42,7 @@ Adding words to aspell
 2. ensure that the number: "personal_ws-1.1 en 8" the "8" in this case, is updated as you add words
 3. Once you're done: ctrl + x, y, ENTER
 
+New flow
+1. In root: npm run make
+
 IGNORE ALL FILES NOT REFERENCED IN THIS README UNLESS YOU TALK TO ALEC FIRST
