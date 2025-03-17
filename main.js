@@ -14,7 +14,7 @@ autoUpdater.logger.transports.file.level = "info";
 
 // Auto-updater event listeners
 autoUpdater.on("update-available", () => {
-  log.info("🔄 Update available! Downloading...");
+  log.info("Update available! Downloading...");
   dialog.showMessageBox({
     type: "info",
     title: "Update Available",
@@ -23,7 +23,7 @@ autoUpdater.on("update-available", () => {
 });
 
 autoUpdater.on("update-downloaded", () => {
-  log.info("✅ Update downloaded! Prompting user...");
+  log.info("Update downloaded! Prompting user...");
   dialog
     .showMessageBox({
       type: "info",
@@ -33,7 +33,7 @@ autoUpdater.on("update-downloaded", () => {
     })
     .then((response) => {
       if (response.response === 0) {
-        log.info("🔄 Installing update and restarting...");
+        log.info("Installing update and restarting...");
         autoUpdater.quitAndInstall();
       }
     });
@@ -43,30 +43,37 @@ autoUpdater.on("update-downloaded", () => {
 function checkForUpdates() {
   log.info("🔄 Checking for updates...");
 
-  // ✅ Fix: Check updates differently in development mode
+  // Fix: Check updates differently in development mode
   if (!app.isPackaged) {
-    log.info("⚠️ Skipping updates in development mode.");
+    log.info("Skipping updates in development mode.");
     return;
   }
 
   autoUpdater
     .checkForUpdatesAndNotify()
-    .then((result) => log.info("🔄 Update check result:", result))
-    .catch((error) => log.error("⚠️ Update check failed:", error));
+    .then((result) => log.info("Update check result:", result))
+    .catch((error) => log.error("Update check failed:", error));
 }
 
 // Start backend
 function startBackend() {
   log.info("🚀 Starting backend server...");
-  const backendPath = path.join(__dirname, "backend", "server.js");
-  backendProcess = exec(`node ${backendPath}`);
+
+  // Use the correct path in production & development
+  const backendPath = app.isPackaged
+    ? path.join(process.resourcesPath, "backend", "server.js") // Packaged
+    : path.join(__dirname, "backend", "server.js"); // Development
+
+  log.info(`Backend path: ${backendPath}`);
+
+  backendProcess = exec(`node "${backendPath}"`);
 
   backendProcess.stdout.on("data", (data) => log.info(`Backend: ${data}`));
   backendProcess.stderr.on("data", (data) =>
     log.error(`Backend Error: ${data}`)
   );
   backendProcess.on("exit", (code) =>
-    log.error(`❌ Backend process exited with code: ${code}`)
+    log.error(`Backend process exited with code: ${code}`)
   );
 }
 
@@ -78,7 +85,7 @@ function startFrontend() {
     log.info(`Frontend: ${data}`);
     // Detect when the frontend has successfully started
     if (data.includes("Local: http://localhost:8080")) {
-      log.info("✅ Frontend is now running!");
+      log.info("Frontend is now running!");
       createWindow(); // Ensure the window is only created when frontend is ready
     }
   });
@@ -87,7 +94,7 @@ function startFrontend() {
   });
 
   frontendProcess.on("exit", (code) => {
-    log.error(`❌ Frontend process exited with code: ${code}`);
+    log.error(`Frontend process exited with code: ${code}`);
   });
 }
 
@@ -103,7 +110,7 @@ function createWindow() {
 
   if (app.isPackaged) {
     // Load the Vue frontend from the build folder
-    const indexPath = path.join(__dirname,"docs", "index.html");
+    const indexPath = path.join(__dirname, "docs", "index.html");
     mainWindow.loadFile(indexPath);
   } else {
     // Development mode: Load from localhost
@@ -123,7 +130,7 @@ const checkFrontend = setInterval(() => {
     .get("http://localhost:8080", (res) => {
       if (res.statusCode === 200) {
         clearInterval(checkFrontend);
-        log.info("✅ Frontend is available! Loading into Electron...");
+        log.info("Frontend is available! Loading into Electron...");
         mainWindow.loadURL("http://localhost:8080");
       }
     })
@@ -134,19 +141,19 @@ const checkFrontend = setInterval(() => {
 
 // Start the app
 app.whenReady().then(async () => {
-  log.info("🔄 App is ready. Checking for updates...");
-  checkForUpdates(); // ✅ Ensures app checks for updates only when packaged
+  log.info("App is ready. Checking for updates...");
+  checkForUpdates(); // Ensures app checks for updates only when packaged
 
-  log.info("🚀 Starting backend...");
+  log.info("Starting backend...");
   startBackend();
 
   // Wait for backend to be available
-  log.info("⌛ Waiting for backend to be available...");
+  log.info("Waiting for backend to be available...");
   await new Promise((resolve) => {
     let attempts = 0;
     const checkInterval = setInterval(() => {
       if (attempts > 10) {
-        log.error("❌ Backend did not start after 10 seconds. Proceeding...");
+        log.error("Backend did not start after 10 seconds. Proceeding...");
         clearInterval(checkInterval);
         resolve();
       }
@@ -154,22 +161,22 @@ app.whenReady().then(async () => {
       const client = new net.Socket();
       client
         .connect(3000, "127.0.0.1", () => {
-          log.info("✅ Backend is now running!");
+          log.info("Backend is now running!");
           clearInterval(checkInterval);
           client.destroy();
           resolve();
         })
         .on("error", () => {
-          log.info("⌛ Waiting for backend...");
+          log.info("Waiting for backend...");
           attempts++;
         });
     }, 1000);
   });
 
-  log.info("✅ Backend check complete. Starting frontend...");
+  log.info("Backend check complete. Starting frontend...");
   startFrontend();
 
-  log.info("🖥️ Creating Electron window...");
+  log.info("Creating Electron window...");
   createWindow();
 });
 
