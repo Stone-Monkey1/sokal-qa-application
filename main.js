@@ -101,23 +101,36 @@ function createWindow() {
     },
   });
 
-  log.info("⌛ Waiting for frontend to be available...");
+  if (app.isPackaged) {
+    // Load the Vue frontend from the build folder
+    const indexPath = path.join(__dirname,"docs", "index.html");
+    mainWindow.loadFile(indexPath);
+  } else {
+    // Development mode: Load from localhost
+    mainWindow.loadURL("http://localhost:8080");
+  }
 
-  // Keep checking if frontend is available before loading Electron window
-  const checkFrontend = setInterval(() => {
-    require("http")
-      .get("http://localhost:8080", (res) => {
-        if (res.statusCode === 200) {
-          clearInterval(checkFrontend);
-          log.info("✅ Frontend is available! Loading into Electron...");
-          mainWindow.loadURL("http://localhost:8080");
-        }
-      })
-      .on("error", () => {
-        log.info("⌛ Waiting for frontend...");
-      });
-  }, 1000); // Check every second
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
+
+log.info("⌛ Waiting for frontend to be available...");
+
+// Keep checking if frontend is available before loading Electron window
+const checkFrontend = setInterval(() => {
+  require("http")
+    .get("http://localhost:8080", (res) => {
+      if (res.statusCode === 200) {
+        clearInterval(checkFrontend);
+        log.info("✅ Frontend is available! Loading into Electron...");
+        mainWindow.loadURL("http://localhost:8080");
+      }
+    })
+    .on("error", () => {
+      log.info("⌛ Waiting for frontend...");
+    });
+}, 1000); // Check every second
 
 // Start the app
 app.whenReady().then(async () => {
