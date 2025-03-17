@@ -46,16 +46,30 @@ const homepageTests = {
 };
 
 async function runTests(url, selectedTests) {
+  console.log("Resetting test results...");
   const results = {};
+  executedTests.clear();
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
   });
+  await context.clearCookies();
+  await context.clearPermissions();
+
   const page = await context.newPage();
 
   console.log(`Navigating to homepage: ${url}`);
-  await page.goto(url, { timeout: 60000 });
+  await page.goto(url, {
+    timeout: 60000,
+    waitUntil: "networkidle",
+    referer: "",
+    noCache: true,
+    extraHTTPHeaders: {
+      "Cache-Control": "no-store",
+      Pragma: "no-cache",
+    },
+  });
 
   // Get navbar links
   const navbarLinks = await getNavbarLinks(page);
@@ -94,15 +108,20 @@ async function runTests(url, selectedTests) {
     }
   }
 
-  // 🚨 **Only loop through other pages if navbar-related tests are selected**
+  // Only loop through other pages if navbar-related tests are selected**
   if (navbarTestsSelected || imageTestsSelected) {
     for (const link of allPages) {
-      console.log(`Navigating to: ${link}`);
-      await page.goto(link, {
-        waitUntil: "domcontentloaded",
-        timeout: 30000,
-      });
-
+      try {
+        console.log(`Navigating to: ${link}`);
+        await page.goto(link, {
+          waitUntil: "domcontentloaded",
+          timeout: 60000, // Increased timeout
+        });
+      } catch (error) {
+        console.error(`⚠️ Skipping ${link} due to timeout.`);
+        results[link] = { error: "Page load timeout" };
+        continue; // Skip this page and move to the next one
+      }
       if (!results[link]) {
         results[link] = {};
       }
