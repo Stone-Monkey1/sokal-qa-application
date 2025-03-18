@@ -4,12 +4,13 @@
     <transition name="slide">
       <div v-if="showToDo" class="to-do-panel" @click.stop>
         <button class="close-btn" @click="toggleToDo">✖ Close</button>
-        <QAToDo/>
+        <QAToDo />
       </div>
     </transition>
     <div class="container">
+      <h2>Test 1</h2>
       <QAForm @run-tests="runTests" />
-      <QAResults v-if="results" :results="results"/>
+      <QAResults v-if="results" :results="results" />
     </div>
     <div class="git-push-test-section">
       <p>Testing testing testing</p>
@@ -28,7 +29,7 @@ export default {
     QAForm,
     QAHeader,
     QAResults,
-    QAToDo
+    QAToDo,
   },
   data() {
     return {
@@ -38,8 +39,13 @@ export default {
   },
   methods: {
     async runTests({ url, selectedTests }) {
+      const API_URL =
+        process.env.NODE_ENV === "production"
+          ? "http://127.0.0.1:3000/run-tests" // ✅ Production (Electron)
+          : "http://localhost:3000/run-tests"; // ✅ Development (npm run serve)
+
       try {
-        const response = await fetch("http://localhost:3000/run-tests", {
+        const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url, selectedTests }),
@@ -47,7 +53,7 @@ export default {
 
         this.results = await response.json();
       } catch (error) {
-        console.error("Error running tests:", error);
+        console.error("❌ Error running tests:", error);
         this.results = { error: "Failed to fetch results" };
       }
     },
@@ -59,14 +65,12 @@ export default {
       console.log("To-Do Panel Visibility PRE:", this.showToDo);
       this.showToDo = !this.showToDo;
       console.log("To-Do Panel Visibility POST:", this.showToDo);
-      // this.toggleLock = true;
-      // setTimeout(() => { this.toggleLock = false; }, 500)
     },
   },
 };
 </script>
 <style>
- .git-push-test-section {
+.git-push-test-section {
   background-color: #2b2b2b;
   color: #eeeeee;
   padding: 24px;
@@ -74,10 +78,9 @@ export default {
   font-weight: light;
   width: 100%;
   border: 1px solid #000000;
- }
+}
 
-
- /* To Do Sliding Panel to hide To Do Tasks */
+/* To Do Sliding Panel to hide To Do Tasks */
 /* .to-do-panel {
   background-color: white;
   width: 100%;

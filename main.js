@@ -4,9 +4,26 @@ const log = require("electron-log");
 const { exec } = require("child_process");
 const path = require("path");
 
+const gotTheLock = app.requestSingleInstanceLock();
+
+process.env.NODE_ENV = app.isPackaged ? "production" : "development";
+
 let mainWindow;
 let backendProcess;
 let frontendProcess;
+
+if (!gotTheLock) {
+  app.quit();
+  return;
+}
+
+app.on("second-instance", () => {
+  // If a second instance is opened, focus the existing window
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
+});
 
 // Log auto-updater events
 autoUpdater.logger = log;
@@ -59,101 +76,128 @@ function checkForUpdates() {
 function startBackend() {
   log.info("🚀 Starting backend server...");
 
-  // Use the correct path in production & development
   const backendPath = app.isPackaged
-    ? path.join(process.resourcesPath, "backend", "server.js") // Packaged
-    : path.join(__dirname, "backend", "server.js"); // Development
+    ? path.join(process.resourcesPath, "app", "backend", "server.js")
+    : path.join(__dirname, "backend", "server.js");
 
-  log.info(`Backend path: ${backendPath}`);
+  const nodePath = app.isPackaged
+    ? path.join(process.resourcesPath,"app", "node-bin", "node") // ✅ Use packaged Node binary
+    : "node"; // Use system Node.js in development
 
-  backendProcess = exec(`node "${backendPath}"`);
+  log.info(`📌 Backend path: ${backendPath}`);
+  log.info(`📌 Node path: ${nodePath}`);
+
+  backendProcess = exec(
+    `"${nodePath}" "${backendPath}"`,
+    (error, stdout, stderr) => {
+      if (error) {
+        log.error(`❌ Backend Error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        log.error(`Backend stderr: ${stderr}`);
+        return;
+      }
+      log.info(`Backend stdout: ${stdout}`);
+    }
+  );
 
   backendProcess.stdout.on("data", (data) => log.info(`Backend: ${data}`));
   backendProcess.stderr.on("data", (data) =>
     log.error(`Backend Error: ${data}`)
-  );
-  backendProcess.on("exit", (code) =>
-    log.error(`Backend process exited with code: ${code}`)
   );
 }
 
 // Start frontend
 function startFrontend() {
   log.info("🚀 Starting frontend server...");
+  if (app.isPackaged) {
+    log.info("✅ Skipping frontend server in production.");
+    return;
+  }
   frontendProcess = exec("cd frontend && npm run serve");
-  frontendProcess.stdout.on("data", (data) => {
-    log.info(`Frontend: ${data}`);
-    // Detect when the frontend has successfully started
-    if (data.includes("Local: http://localhost:8080")) {
-      log.info("Frontend is now running!");
-      createWindow(); // Ensure the window is only created when frontend is ready
-    }
-  });
-  frontendProcess.stderr.on("data", (data) => {
-    log.error(`Frontend Error: ${data}`);
-  });
-
-  frontendProcess.on("exit", (code) => {
-    log.error(`Frontend process exited with code: ${code}`);
-  });
 }
 
 // Create Electron window
 function createWindow() {
+  if (mainWindow) {
+    log.info("🖥️ Main window already exists. Skipping re-creation.");
+    return; // ✅ Prevents multiple instances
+  }
+
+  log.info("🖥️ Creating Electron window...");
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false, // Allows local file access
     },
   });
-
-  if (app.isPackaged) {
-    // Load the Vue frontend from the build folder
-    const indexPath = path.join(__dirname, "docs", "index.html");
-    mainWindow.loadFile(indexPath);
-  } else {
-    // Development mode: Load from localhost
-    mainWindow.loadURL("http://localhost:8080");
-  }
 
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  if (app.isPackaged) {
+    const indexPath = `file://${path.join(
+      process.resourcesPath,
+      "app",
+      "docs",
+      "index.html"
+    )}`;
+    log.info(`📌 Loading frontend from ${indexPath}`);
+    mainWindow.loadURL(indexPath);
+  } else {
+    log.info("🚀 Loading frontend from localhost:8080");
+    mainWindow.loadURL("http://localhost:8080");
+  }
 }
 
 log.info("⌛ Waiting for frontend to be available...");
 
 // Keep checking if frontend is available before loading Electron window
-const checkFrontend = setInterval(() => {
-  require("http")
-    .get("http://localhost:8080", (res) => {
-      if (res.statusCode === 200) {
-        clearInterval(checkFrontend);
-        log.info("Frontend is available! Loading into Electron...");
-        mainWindow.loadURL("http://localhost:8080");
-      }
-    })
-    .on("error", () => {
-      log.info("⌛ Waiting for frontend...");
-    });
-}, 1000); // Check every second
+if (!app.isPackaged) {
+  log.info("⌛ Waiting for frontend to be available...");
+
+  const checkFrontend = setInterval(() => {
+    require("http")
+      .get("http://localhost:8080", (res) => {
+        if (res.statusCode === 200) {
+          clearInterval(checkFrontend);
+          log.info("Frontend is available! Loading into Electron...");
+          if (mainWindow) {
+            mainWindow.loadURL("http://localhost:8080");
+          } else {
+            log.error(
+              "Attempted to load frontend but mainWindow is undefined."
+            );
+          }
+        }
+      })
+      .on("error", () => {
+        log.info("⌛ Waiting for frontend...");
+      });
+  }, 1000);
+} else {
+  log.info("✅ Skipping frontend availability check in production.");
+}
 
 // Start the app
 app.whenReady().then(async () => {
   log.info("App is ready. Checking for updates...");
-  checkForUpdates(); // Ensures app checks for updates only when packaged
+  checkForUpdates();
 
   log.info("Starting backend...");
   startBackend();
 
-  // Wait for backend to be available
   log.info("Waiting for backend to be available...");
   await new Promise((resolve) => {
     let attempts = 0;
+    const maxAttempts = 15; // Limit retries
     const checkInterval = setInterval(() => {
-      if (attempts > 10) {
-        log.error("Backend did not start after 10 seconds. Proceeding...");
+      if (attempts >= maxAttempts) {
+        log.error("Backend did not start after 15 seconds. Skipping.");
         clearInterval(checkInterval);
         resolve();
       }

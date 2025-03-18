@@ -45,4 +45,7 @@ Adding words to aspell
 New flow
 1. In root: npm run make
 
+New Setup
+1. bash setup-node-bin.sh
+
 IGNORE ALL FILES NOT REFERENCED IN THIS README UNLESS YOU TALK TO ALEC FIRST

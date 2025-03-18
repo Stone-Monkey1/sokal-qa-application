@@ -30,7 +30,9 @@
     "files": [
       "main.js",
       "backend/**",
-      "docs/**"
+      "docs/**",
+      "node_modules/**",
+      "nnode-bin/**"
     ]
   },
   "config": {
