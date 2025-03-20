@@ -1,6 +1,6 @@
 {
   "name": "sokal-qa-application",
-  "version": "1.0.9",
+  "version": "1.0.13",
   "description": "QA Testing App",
   "main": "main.js",
   "scripts": {
@@ -40,6 +40,7 @@
       "main.js",
       "docs/**",
       "node_modules/**",
+      "utility/**",
       "!frontend/",
       "!build/"
     ],
@@ -52,7 +53,13 @@
         "from": "node-bin/",
         "to": "node-bin/"
       }
-    ]
+    ],
+    "mac": {
+      "target": [
+        "zip"
+      ],
+      "artifactName": "${productName}-${version}-${arch}.zip"
+    }
   },
   "config": {
     "forge": {
