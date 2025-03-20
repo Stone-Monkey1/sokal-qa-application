@@ -8,12 +8,8 @@
       </div>
     </transition>
     <div class="container">
-      <h2>Test 1</h2>
       <QAForm @run-tests="runTests" />
       <QAResults v-if="results" :results="results" />
-    </div>
-    <div class="git-push-test-section">
-      <p>Testing testing testing</p>
     </div>
   </div>
 </template>
@@ -41,8 +37,8 @@ export default {
     async runTests({ url, selectedTests }) {
       const API_URL =
         process.env.NODE_ENV === "production"
-          ? "http://127.0.0.1:3000/run-tests" // ✅ Production (Electron)
-          : "http://localhost:3000/run-tests"; // ✅ Development (npm run serve)
+          ? "http://127.0.0.1:3000/run-tests" 
+          : "http://localhost:3000/run-tests"; 
 
       try {
         const response = await fetch(API_URL, {
@@ -70,26 +66,9 @@ export default {
 };
 </script>
 <style>
-.git-push-test-section {
-  background-color: #2b2b2b;
-  color: #eeeeee;
-  padding: 24px;
-  font-size: 2em;
-  font-weight: light;
-  width: 100%;
-  border: 1px solid #000000;
-}
+
 
 /* To Do Sliding Panel to hide To Do Tasks */
-/* .to-do-panel {
-  background-color: white;
-  width: 100%;
-  height: 100%;
-  padding: 20px;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
-  transform: translateX(0%);
-  transition: transform 0.3s ease-in-out;
-} */
 
 .to-do-panel {
   position: fixed;
@@ -113,18 +92,6 @@ export default {
   transform: translateX(100%);
   transition: transform 0.3s ease-in-out;
 }
-
-/* .slide-enter {
-  transition: transform .3s ease-in-out;
-} */
-
-/* .slide-enter-to {
-  transform: translateX(0%);
-} */
-
-/* .slide-leave-to {
-  transform: translateX(100%);
-} */
 
 .close-btn {
   position: absolute;

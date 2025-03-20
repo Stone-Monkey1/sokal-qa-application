@@ -1,5 +1,5 @@
-const { app, BrowserWindow, dialog } = require("electron");
-const { autoUpdater } = require("electron-updater"); // ✅ Correct Import
+const { app, BrowserWindow, dialog, ipcMain } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const log = require("electron-log");
 const { exec } = require("child_process");
 const path = require("path");
@@ -11,6 +11,14 @@ process.env.NODE_ENV = app.isPackaged ? "production" : "development";
 let mainWindow;
 let backendProcess;
 let frontendProcess;
+
+ipcMain.handle("get-app-version", () => {
+  return app.getVersion();
+});
+
+const updateConfigPath = path.join(process.resourcesPath, "app-update.yml");
+autoUpdater.updateConfigPath = updateConfigPath;
+log.info(`📌 Set update config path: ${updateConfigPath}`);
 
 if (!gotTheLock) {
   app.quit();
@@ -77,11 +85,11 @@ function startBackend() {
   log.info("🚀 Starting backend server...");
 
   const backendPath = app.isPackaged
-    ? path.join(process.resourcesPath, "app", "backend", "server.js")
+    ? path.join(process.resourcesPath, "backend", "server.js")
     : path.join(__dirname, "backend", "server.js");
 
   const nodePath = app.isPackaged
-    ? path.join(process.resourcesPath,"app", "node-bin", "node") // ✅ Use packaged Node binary
+    ? path.join(process.resourcesPath, "node-bin", "node") // Use packaged Node binary
     : "node"; // Use system Node.js in development
 
   log.info(`📌 Backend path: ${backendPath}`);
@@ -138,14 +146,8 @@ function createWindow() {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
-
   if (app.isPackaged) {
-    const indexPath = `file://${path.join(
-      process.resourcesPath,
-      "app",
-      "docs",
-      "index.html"
-    )}`;
+    const indexPath = `file://${path.join(__dirname, "docs", "index.html")}`;
     log.info(`📌 Loading frontend from ${indexPath}`);
     mainWindow.loadURL(indexPath);
   } else {
@@ -226,10 +228,34 @@ app.whenReady().then(async () => {
 
 // Close Processes on App Exit
 app.on("window-all-closed", () => {
-  if (backendProcess) backendProcess.kill();
-  if (frontendProcess) frontendProcess.kill();
+  log.info("Closing application...");
+
+  if (backendProcess) {
+    log.info("Terminating backend process...");
+    backendProcess.kill();
+  }
+
+  if (frontendProcess) {
+    log.info("Terminating frontend process...");
+    frontendProcess.kill();
+  }
+
   if (process.platform !== "darwin") {
     app.quit();
+  }
+});
+
+app.on("quit", () => {
+  log.info("Application is quitting...");
+
+  if (backendProcess) {
+    log.info("Killing backend process...");
+    backendProcess.kill();
+  }
+
+  if (frontendProcess) {
+    log.info("Killing frontend process...");
+    frontendProcess.kill();
   }
 });
 

@@ -48,4 +48,14 @@ New flow
 New Setup
 1. bash setup-node-bin.sh
 
+Getting the app on your computer:
+1. Don't click to unzip the app. Explanation: I'm not an apple approved devloper, so I wasn't able to notarize this application. To keep you safe Apple will quarantine the app.
+2. Instead go into your terminal and type "cd ~/Downloads"
+3. Then "unzip sokal-qa-application-darwin-arm64.zip"
+4. Then, while still in Downloads, run "xattr -rd com.apple.quarantine ~/Downloads/sokal-qa-application.app"
+5. You my also need to go to System Settings -> Privacy & Security
+6. Scroll to Security and look for "sokal-qa-application" was blocked from use because it is not from an identified developer.
+7. Click "Allow Anyway"
+8. Try opening again
+
 IGNORE ALL FILES NOT REFERENCED IN THIS README UNLESS YOU TALK TO ALEC FIRST
