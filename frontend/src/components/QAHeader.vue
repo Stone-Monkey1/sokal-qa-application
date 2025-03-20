@@ -1,6 +1,9 @@
 <template>
   <div class="header padding-5-percent background-grey">
     <div class="header-left">
+      <button class="update-btn" @click="checkForUpdates">
+        Check for Updates
+      </button>
       <p>{{ appVersion }}</p>
       <h1>
         <img
@@ -52,6 +55,20 @@ export default {
     } else {
       console.warn("Electron not detected. Running in browser mode.");
     }
+  },
+  methods: {
+    async checkForUpdates() {
+      if (window.require) {
+        try {
+          const { ipcRenderer } = window.require("electron");
+          await ipcRenderer.invoke("check-for-updates");
+        } catch (error) {
+          console.error("Failed to check for updates:", error);
+        }
+      } else {
+        console.warn("Electron not detected. Running in browser mode.");
+      }
+    },
   },
 };
 </script>

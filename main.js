@@ -1,8 +1,9 @@
-const { app, BrowserWindow, dialog, ipcMain } = require("electron");
-const { autoUpdater } = require("electron-updater");
+const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
 const log = require("electron-log");
 const { exec } = require("child_process");
 const path = require("path");
+const axios = require("axios");
+const semver = require("semver");
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -12,13 +13,60 @@ let mainWindow;
 let backendProcess;
 let frontendProcess;
 
+// ipc handlers
 ipcMain.handle("get-app-version", () => {
   return app.getVersion();
 });
+ipcMain.handle("check-for-updates", async () => {
+  await checkForUpdates();
+});
 
-const updateConfigPath = path.join(process.resourcesPath, "app-update.yml");
-autoUpdater.updateConfigPath = updateConfigPath;
-log.info(`📌 Set update config path: ${updateConfigPath}`);
+// Check for updates
+async function checkForUpdates() {
+  log.info("🔄 Checking for updates...");
+
+  const repoOwner = "Stone-Monkey1";
+  const repoName = "sokal-qa-application";
+
+  try {
+    // Fetch the latest release from GitHub API
+    const response = await axios.get(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`
+    );
+    const latestVersion = response.data.tag_name.replace("v", "").trim(); // Extract and clean version
+    const currentVersion = app.getVersion().trim();
+
+    log.info(`Latest version on GitHub: ${latestVersion}`);
+    log.info(`Current app version: ${currentVersion}`);
+
+    // Use semver to check if the GitHub version is newer
+    if (semver.valid(latestVersion) && semver.valid(currentVersion)) {
+      if (semver.gt(latestVersion, currentVersion)) {
+        log.info("🚀 Update available! Prompting user...");
+        const updateURL = response.data.html_url; // Link to the release page
+
+        dialog
+          .showMessageBox({
+            type: "info",
+            title: "Update Available",
+            message: `A new version (v${latestVersion}) is available!`,
+            buttons: ["Download", "Later"],
+          })
+          .then((result) => {
+            if (result.response === 0) {
+              shell.openExternal(updateURL); // Opens the GitHub releases page in the browser
+            }
+          });
+      } else {
+        log.info("✅ No update needed. Running latest or newer version.");
+      }
+    } else {
+      log.warn("⚠️ Invalid version format detected.");
+    }
+  } catch (error) {
+    log.error("❌ Failed to check for updates:", error.message);
+  }
+}
 
 if (!gotTheLock) {
   app.quit();
@@ -32,53 +80,6 @@ app.on("second-instance", () => {
     mainWindow.focus();
   }
 });
-
-// Log auto-updater events
-autoUpdater.logger = log;
-autoUpdater.logger.transports.file.level = "info";
-
-// Auto-updater event listeners
-autoUpdater.on("update-available", () => {
-  log.info("Update available! Downloading...");
-  dialog.showMessageBox({
-    type: "info",
-    title: "Update Available",
-    message: "A new version is available. Downloading now...",
-  });
-});
-
-autoUpdater.on("update-downloaded", () => {
-  log.info("Update downloaded! Prompting user...");
-  dialog
-    .showMessageBox({
-      type: "info",
-      title: "Update Ready",
-      message: "Install and restart now?",
-      buttons: ["Yes", "Later"],
-    })
-    .then((response) => {
-      if (response.response === 0) {
-        log.info("Installing update and restarting...");
-        autoUpdater.quitAndInstall();
-      }
-    });
-});
-
-// Function to check for updates
-function checkForUpdates() {
-  log.info("🔄 Checking for updates...");
-
-  // Fix: Check updates differently in development mode
-  if (!app.isPackaged) {
-    log.info("Skipping updates in development mode.");
-    return;
-  }
-
-  autoUpdater
-    .checkForUpdatesAndNotify()
-    .then((result) => log.info("Update check result:", result))
-    .catch((error) => log.error("Update check failed:", error));
-}
 
 // Start backend
 function startBackend() {
