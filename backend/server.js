@@ -45,6 +45,16 @@ const homepageTests = {
   homepageInteractionBarTest,
 };
 
+console.log("Backend server starting...");
+
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection:", reason);
+});
+
 async function runTests(url, selectedTests) {
   console.log("Resetting test results...");
   const results = {};

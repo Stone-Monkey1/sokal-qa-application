@@ -1,66 +1,55 @@
-const { app, BrowserWindow } = require("electron");
-const log = require("electron-log");
-const { exec } = require("child_process");
+const { exec, spawn } = require("child_process");
 const path = require("path");
+const log = require("electron-log");
+const { app, BrowserWindow } = require("electron");
 
-let mainWindow;
-let backendProcess;
-let frontendProcess;
+let _backendProcess = null;
+let _frontendProcess = null;
+let mainWindow = null;
 
-// Start backend
 function startBackend() {
   log.info("🚀 Starting backend server...");
 
   const backendPath = app.isPackaged
     ? path.join(process.resourcesPath, "backend", "server.js")
-    : path.join(__dirname, "..", "backend", "server.js"); // Adjusted for correct relative path
+    : path.join(__dirname, "..", "backend", "server.js");
 
   const nodePath = app.isPackaged
     ? path.join(process.resourcesPath, "node-bin", "node")
-    : "node"; // Use system Node.js in development
+    : "node";
 
   log.info(`📌 Backend path: ${backendPath}`);
   log.info(`📌 Node path: ${nodePath}`);
 
-  backendProcess = exec(
-    `"${nodePath}" "${backendPath}"`,
-    (error, stdout, stderr) => {
-      if (error) {
-        log.error(`❌ Backend Error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        log.error(`Backend stderr: ${stderr}`);
-        return;
-      }
-      log.info(`Backend stdout: ${stdout}`);
-    }
-  );
+  _backendProcess = spawn(nodePath, [backendPath], {
+    stdio: ["ignore", "pipe", "pipe"], // or ['pipe', 'pipe', 'pipe'] if you want logging
+    detached: false, // ← explicitly make sure it's not detached
+  });
+  _backendProcess.on("exit", (code, signal) => {
+    log.info(`💀 Backend process exited with code ${code}, signal ${signal}`);
+    _backendProcess = null;
+  });
+  
 
-  backendProcess.stdout.on("data", (data) => log.info(`Backend: ${data}`));
-  backendProcess.stderr.on("data", (data) =>
-    log.error(`Backend Error: ${data}`)
-  );
+  log.info(`🧠 Backend process started with PID: ${_backendProcess.pid}`);
 }
 
-// Start frontend
 function startFrontend() {
   log.info("🚀 Starting frontend server...");
   if (app.isPackaged) {
     log.info("✅ Skipping frontend server in production.");
     return;
   }
-  frontendProcess = exec("cd frontend && npm run serve");
+
+  _frontendProcess = exec("cd frontend && npm run serve");
 }
 
-// Create Electron window
 function createWindow() {
   if (mainWindow) {
     log.info("🖥️ Main window already exists. Skipping re-creation.");
     return;
   }
 
-  log.info("🖥️ Creating Electron window...");
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -74,26 +63,40 @@ function createWindow() {
     mainWindow = null;
   });
 
-  if (app.isPackaged) {
-    const indexPath = `file://${path.join(
-      __dirname,
-      "..",
-      "docs",
-      "index.html"
-    )}`;
-    log.info(`📌 Loading frontend from ${indexPath}`);
-    mainWindow.loadURL(indexPath);
-  } else {
-    log.info("🚀 Loading frontend from localhost:8080");
-    mainWindow.loadURL("http://localhost:8080");
-  }
+  const url = app.isPackaged
+    ? `file://${path.join(__dirname, "..", "docs", "index.html")}`
+    : "http://localhost:8080";
+
+  log.info(`📌 Loading frontend from ${url}`);
+  mainWindow.loadURL(url);
+}
+
+// Export accessors instead of raw variables
+function getBackendProcess() {
+  return _backendProcess;
+}
+
+function getFrontendProcess() {
+  return _frontendProcess;
+}
+
+function getBackendProcess() {
+  return _backendProcess;
+}
+
+function getFrontendProcess() {
+  return _frontendProcess;
+}
+
+function getMainWindow() {
+  return mainWindow;
 }
 
 module.exports = {
   startBackend,
   startFrontend,
   createWindow,
-  backendProcess,
-  frontendProcess,
-  mainWindow,
+  getBackendProcess,
+  getFrontendProcess,
+  getMainWindow,
 };

@@ -1,25 +1,14 @@
 const { app, ipcMain } = require("electron");
 const log = require("electron-log");
 const { checkForUpdates } = require("./utility/updateChecker");
-const {
-  startBackend,
-  startFrontend,
-  createWindow,
-  backendProcess,
-  frontendProcess,
-} = require("./utility/appLauncher");
+const launcher = require("./utility/appLauncher");
 
 const gotTheLock = app.requestSingleInstanceLock();
-
 process.env.NODE_ENV = app.isPackaged ? "production" : "development";
 
-// ipc handlers
-ipcMain.handle("get-app-version", () => {
-  return app.getVersion();
-});
-ipcMain.handle("check-for-updates", async () => {
-  await checkForUpdates();
-});
+// IPC handlers
+ipcMain.handle("get-app-version", () => app.getVersion());
+ipcMain.handle("check-for-updates", async () => await checkForUpdates());
 
 if (!gotTheLock) {
   app.quit();
@@ -27,19 +16,25 @@ if (!gotTheLock) {
 }
 
 app.on("second-instance", () => {
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.focus();
+  const win = launcher.getMainWindow();
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.focus();
   }
 });
 
-// Start the app
+app.on("activate", () => {
+  if (launcher.getMainWindow() === null) {
+    launcher.createWindow();
+  }
+});
+
 app.whenReady().then(async () => {
   log.info("App is ready. Checking for updates...");
   checkForUpdates();
 
   log.info("Starting backend...");
-  startBackend();
+  launcher.startBackend();
 
   log.info("Waiting for backend to be available...");
   await new Promise((resolve) => {
@@ -68,47 +63,46 @@ app.whenReady().then(async () => {
   });
 
   log.info("Backend check complete. Starting frontend...");
-  startFrontend();
+  launcher.startFrontend();
 
   log.info("Creating Electron window...");
-  createWindow();
+  launcher.createWindow();
 });
 
-// Close Processes on App Exit
+function killProcesses() {
+  const backend = launcher.getBackendProcess();
+  if (backend) {
+    log.info("Killing backend process...");
+
+    try {
+      process.kill(backend.pid, 0); // check if alive
+      process.kill(backend.pid, "SIGTERM");
+      log.info("✅ Backend process killed.");
+    } catch (err) {
+      if (err.code === "ESRCH") {
+        log.warn("⚠️ Backend process already exited.");
+      } else {
+        log.error("❌ Error killing backend process:", err.message);
+      }
+    }
+  } else {
+    log.warn("⚠️ No backend process found.");
+  }
+
+  const frontend = launcher.getFrontendProcess();
+  if (frontend) {
+    log.info("Killing frontend process...");
+    frontend.kill();
+  }
+}
+
 app.on("window-all-closed", () => {
   log.info("Closing application...");
-
-  if (backendProcess) {
-    log.info("Terminating backend process...");
-    backendProcess.kill();
-  }
-
-  if (frontendProcess) {
-    log.info("Terminating frontend process...");
-    frontendProcess.kill();
-  }
-
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  killProcesses();
+  if (process.platform !== "darwin") app.quit();
 });
 
 app.on("quit", () => {
   log.info("Application is quitting...");
-
-  if (backendProcess) {
-    log.info("Killing backend process...");
-    backendProcess.kill();
-  }
-
-  if (frontendProcess) {
-    log.info("Killing frontend process...");
-    frontendProcess.kill();
-  }
-});
-
-app.on("activate", () => {
-  if (mainWindow === null) {
-    createWindow();
-  }
+  killProcesses();
 });

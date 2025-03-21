@@ -59,12 +59,13 @@
         "zip"
       ],
       "artifactName": "${productName}-${version}-${arch}.zip"
-    }
+    },
+    "icon": "assets/icon.icns"
   },
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "assets/icon",
+        "icon": "assets/icon.icns",
         "prune": true
       },
       "makers": [
