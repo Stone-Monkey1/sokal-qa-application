@@ -1,6 +1,6 @@
 {
   "name": "sokal-qa-application",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "QA Testing App",
   "main": "main.js",
   "scripts": {

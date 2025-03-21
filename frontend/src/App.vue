@@ -8,7 +8,12 @@
       </div>
     </transition>
     <div class="container">
-      <QAForm @run-tests="runTests" />
+      <QAForm
+        @run-tests="runTests"
+        @tests-started="loading = true"
+        @tests-completed="loading = false"
+      />
+      <QALoading :visible="loading" />
       <QAResults v-if="results" :results="results" />
     </div>
   </div>
@@ -19,6 +24,7 @@ import QAForm from "./components/QAForm.vue";
 import QAHeader from "./components/QAHeader.vue";
 import QAResults from "./components/QAResults.vue";
 import QAToDo from "./components/QAToDo.vue";
+import QALoading from "./components/QALoading.vue";
 
 export default {
   components: {
@@ -26,19 +32,21 @@ export default {
     QAHeader,
     QAResults,
     QAToDo,
+    QALoading,
   },
   data() {
     return {
       results: null,
       showToDo: false,
+      loading: false,
     };
   },
   methods: {
     async runTests({ url, selectedTests }) {
       const API_URL =
         process.env.NODE_ENV === "production"
-          ? "http://127.0.0.1:3000/run-tests" 
-          : "http://localhost:3000/run-tests"; 
+          ? "http://127.0.0.1:3000/run-tests"
+          : "http://localhost:3000/run-tests";
 
       try {
         const response = await fetch(API_URL, {
@@ -51,6 +59,8 @@ export default {
       } catch (error) {
         console.error("❌ Error running tests:", error);
         this.results = { error: "Failed to fetch results" };
+      } finally {
+        this.loading = false;
       }
     },
     toggleToDo(event) {
@@ -66,8 +76,6 @@ export default {
 };
 </script>
 <style>
-
-
 /* To Do Sliding Panel to hide To Do Tasks */
 
 .to-do-panel {

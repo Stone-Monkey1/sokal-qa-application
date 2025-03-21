@@ -100,7 +100,7 @@
         </label>
       </div>
       <div class="padding-1"></div>
-      <button @click="submitTests">Run Tests</button>
+      <button @click="emitRunTests">Run Tests</button>
     </div>
   </div>
 </template>
@@ -114,7 +114,8 @@ export default {
     };
   },
   methods: {
-    submitTests() {
+    emitRunTests() {
+      this.$emit("tests-started");
       this.$emit("run-tests", {
         url: this.url,
         selectedTests: this.selectedTests,
