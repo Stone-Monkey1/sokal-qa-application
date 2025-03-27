@@ -1,6 +1,6 @@
 {
   "name": "sokal-qa-application",
-  "version": "1.0.14",
+  "version": "1.0.17",
   "description": "QA Testing App",
   "main": "main.js",
   "scripts": {
@@ -34,7 +34,8 @@
     "asar": true,
     "asarUnpack": [
       "backend/**",
-      "node-bin/**"
+      "node-bin/**",
+      "node_modules/playwright/**"
     ],
     "files": [
       "main.js",

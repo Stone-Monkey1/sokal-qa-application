@@ -10,6 +10,9 @@ async function getNavbarLinks(page) {
       "pre-owned-vehicles",
       "used-vehicles",
       "vehicles?",
+      "new-inventory",
+      "used-inventory",
+      "specials"
     ];
 
     let hrefs = [...new Set([...navLinks].map((link) => link.href.trim()))];

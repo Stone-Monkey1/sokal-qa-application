@@ -66,7 +66,7 @@ osascript -e 'tell application "Terminal"
   echo \\"Press Enter to close the running app...\\" && read dummy && \\
   osascript -e \\"tell application \\\\\\"qaApp\\\\\\" to quit\\" && \\
   echo \\"Stopping backend process...\\" && sleep 2 && \\
-  pkill -f backend/server.js && \\
+  pkill -f backend/server.js || echo \\"⚠️ No backend process found or already closed.\\" && \\
   echo \\"Backend process stopped.\\" && \\
   echo \\"Press Enter to replace old app in Applications...\\" && read dummy && \\
   rm -rf /Applications/qaApp.app && \\
@@ -74,7 +74,7 @@ osascript -e 'tell application "Terminal"
   echo \\"Update complete! Press Enter to close...\\" && read dummy && \\
   exit"
 end tell'
-                      `;
+`;
 
                       exec(terminalScript, (error, stdout, stderr) => {
                         if (error) {
