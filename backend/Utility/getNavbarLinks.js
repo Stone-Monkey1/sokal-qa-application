@@ -9,6 +9,7 @@ async function getNavbarLinks(page) {
       "new-vehicles",
       "pre-owned-vehicles",
       "used-vehicles",
+      "usedvehicles",
       "vehicles?",
       "new-inventory",
       "used-inventory",

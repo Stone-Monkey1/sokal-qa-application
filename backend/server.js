@@ -22,47 +22,19 @@ if (!homeDir) {
 }
 
 function ensureChromiumInstalled() {
-  const chromiumCacheDir = path.join(
-    homeDir,
-    "Library",
-    "Caches",
-    "ms-playwright"
-  );
-
-  let found = false;
-
-  if (fs.existsSync(chromiumCacheDir)) {
-    const entries = fs.readdirSync(chromiumCacheDir);
-    found = entries.some((folder) => {
-      const fullPath = path.join(
-        chromiumCacheDir,
-        folder,
-        "chrome-mac",
-        "headless_shell"
-      );
-      const exists = fs.existsSync(fullPath);
-      console.log(`✅ Found Chromium at: ${folder} (${exists ? "✓" : "✗"})`);
-      return exists; // 💡 No longer restricted to folder name
-    });
-  }
-
-  if (!found) {
-    console.log("🧩 Chromium not found. Installing...");
-    try {
-      execFileSync(
-        nodePath,
-        ["node_modules/playwright/cli.js", "install", "chromium"],
-        {
-          cwd: path.resolve(__dirname),
-          stdio: "inherit",
-        }
-      );
-      console.log("✅ Chromium installed successfully.");
-    } catch (err) {
-      console.error("❌ Failed to install Chromium:", err.message);
-    }
-  } else {
-    console.log("✅ Chromium already installed.");
+  try {
+    console.log("📦 Ensuring Chromium is installed...");
+    execFileSync(
+      nodePath,
+      ["node_modules/playwright/cli.js", "install", "chromium"],
+      {
+        cwd: path.resolve(__dirname),
+        stdio: "inherit",
+      }
+    );
+    console.log("✅ Chromium install command completed.");
+  } catch (err) {
+    console.error("❌ Failed to install Chromium:", err.message);
   }
 }
 
@@ -80,7 +52,7 @@ const homepageVehicleCarouselTest = require("./Tests/Homepage/homepageVehicleCar
 const homepageInteractionBarTest = require("./Tests/Homepage/homepageInteractionBarTest");
 
 const getNavbarLinks = require("./Utility/getNavbarLinks");
-const getImages = require("./Utility/getImages");
+const getBodyImages = require("./Utility/getBodyImages");
 
 const app = express();
 app.use(express.json());
@@ -193,7 +165,7 @@ async function runTests(url, selectedTests) {
 
       let images = null;
       if (imageTestsSelected) {
-        images = await getImages(page);
+        images = await getBodyImages(page);
       }
 
       for (const testName of selectedTests) {
