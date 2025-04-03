@@ -46,13 +46,18 @@ const navbarImgAltTagTest = require("./Tests/Navbar/navbarImgAltTagTest");
 const navbarImgResponsiveTest = require("./Tests/Navbar/navbarImgResponsiveTest");
 const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
 const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
+const navbarDescriptionCheckTest = require("./Tests/Navbar/navbarDescriptionCheckTest");
 const homepageQuickLinksTest = require("./Tests/Homepage/homepageQuickLinksTest");
 const homepageTabbedSearchFilterTest = require("./Tests/Homepage/homepageTabbedSearchFilterTest");
 const homepageVehicleCarouselTest = require("./Tests/Homepage/homepageVehicleCarouselTest");
 const homepageInteractionBarTest = require("./Tests/Homepage/homepageInteractionBarTest");
+const homepageNavbarImgAltTagTest = require("./Tests/Homepage/homepageNavbarImgAltTagTest");
+const homepageNavbarImgResponsiveTest = require("./Tests/Homepage/homepageNavbarImgResponsiveTest");
+
 
 const getNavbarLinks = require("./Utility/getNavbarLinks");
 const getBodyImages = require("./Utility/getBodyImages");
+
 
 const app = express();
 app.use(express.json());
@@ -65,6 +70,7 @@ const navbarTests = {
   navbarH1CheckTest,
   navbarSpellCheckTest,
   navbarCheckVideo,
+  navbarDescriptionCheckTest
 };
 
 const navbarImgTests = {
@@ -77,6 +83,8 @@ const homepageTests = {
   homepageTabbedSearchFilterTest,
   homepageVehicleCarouselTest,
   homepageInteractionBarTest,
+  homepageNavbarImgAltTagTest,
+  homepageNavbarImgResponsiveTest,
 };
 
 console.log("Backend server starting...");

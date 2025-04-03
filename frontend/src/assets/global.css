@@ -4,6 +4,10 @@
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
+#app h4 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
 #app a {
   font-size: 1.4rem;
 }
@@ -135,4 +139,18 @@
   .display-flex {
     display: block;
   }
+}
+.qa-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  width: 150px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 0px 5px 15px 5px;
+}
+
+.qa-btn:hover {
+  background: #0056b3;
 }

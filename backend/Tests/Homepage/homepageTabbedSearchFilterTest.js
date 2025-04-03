@@ -2,10 +2,10 @@ async function homepageTabbedSearchFilterTest(page) {
   const url = page.url();
   console.log(`Running homepageTabbedSearchFilterTest on: ${url}`);
 
-  // Ensure Tabbed Search Filter exists
   const tabbedSearchFilterCount = await page
     .locator(".vehicle-type-display")
     .count();
+
   console.log(
     `Tabbed Search Filter Component count: ${tabbedSearchFilterCount}`
   );
@@ -17,7 +17,6 @@ async function homepageTabbedSearchFilterTest(page) {
 
   console.log(`Tabbed Search found on ${url}`);
 
-  // Locate the Excellent Credit tooltip
   const excellentCredit = await page.locator(
     "a[aria-controls='monthlyPaymentFilter'] span[data-toggle='tooltip']"
   );
@@ -34,30 +33,26 @@ async function homepageTabbedSearchFilterTest(page) {
     };
   }
 
-  // Extract tooltip value
   const tooltipValue = await excellentCredit.getAttribute(
     "data-original-title"
   );
   console.log(`Tooltip Value: ${tooltipValue}`);
 
-  // Error tracking
-  const filterErrors = {};
+  const filterResult = {};
 
   if (!tooltipValue || !tooltipValue.includes("7.09")) {
     console.log(`Tooltip does not contain 7.09% on ${url}`);
-    filterErrors["Tooltip Value"] = "Tooltip does not contain 7.09%";
+    filterResult["Tooltip Value"] = "Tooltip does not contain 7.09%";
   } else {
     console.log(`Tooltip contains 7.09% on ${url}`);
+    filterResult["Tooltip Value"] = "Tooltip correctly contains 7.09%";
   }
 
-  // Return results only if errors exist
-  const result =
-    Object.keys(filterErrors).length > 0
-      ? { [url]: { homepageTabbedSearchFilterTest: filterErrors } }
-      : null;
-
-  console.log(`Final result for ${url}:`, result);
-  return result;
+  return {
+    [url]: {
+      homepageTabbedSearchFilterTest: filterResult,
+    },
+  };
 }
 
 module.exports = homepageTabbedSearchFilterTest;

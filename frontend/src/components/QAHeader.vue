@@ -1,7 +1,7 @@
 <template>
   <div class="header padding-5-percent background-grey">
     <div class="header-left">
-      <button class="update-btn" @click="checkForUpdates">
+      <button class="update-btn qa-btn" @click="checkForUpdates">
         Check for Updates
       </button>
       <p>{{ appVersion }}</p>
@@ -78,6 +78,9 @@ export default {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+.header-left .update-btn {
+  width: 200px;
 }
 
 .todo-toggle-btn {

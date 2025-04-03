@@ -2,12 +2,12 @@
   <div class="results">
     <h2>Results:</h2>
     <div class="results-buttons flex-row">
-      <button @click="copyToClipboard" class="copy-btn results-btn flex-column">
+      <button @click="copyToClipboard" class="copy-btn qa-btn flex-column">
         Copy JSON
       </button>
       <button
         @click="toggleAllAccordions"
-        class="accordion-open-button results-btn"
+        class="accordion-open-button qa-btn"
       >
         {{ allAccordionsOpen ? "Close All" : "Open All" }}
       </button>
@@ -150,8 +150,8 @@ export default {
   mounted() {
     // Automatically open URLs with no issues
     this.openAccordions = Object.entries(this.results)
-      .filter(([, tests]) => !this.hasIssues(tests)) // Ignore first element
-      .map(([url]) => url); // Keep the URL for the accordion list
+      .filter(([, tests]) => !this.hasIssues(tests))
+      .map(([url]) => url); 
   },
 };
 </script>
@@ -161,20 +161,6 @@ export default {
   padding: 20px;
 }
 
-.results-btn {
-  background: #007bff;
-  color: white;
-  border: none;
-  width: 150px;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: 5px;
-  margin: 0px 5px 15px 5px;
-}
-
-.results-btn:hover {
-  background: #0056b3;
-}
 
 /* Accordion Styling */
 .accordion {

@@ -7,8 +7,8 @@
         <QAToDo />
       </div>
     </transition>
-    <div class="container">
-      <QAForm
+    <div class="padding-2-percent">
+      <QAFormWrapper
         @run-tests="runTests"
         @tests-started="loading = true"
         @tests-completed="loading = false"
@@ -20,19 +20,19 @@
 </template>
 
 <script>
-import QAForm from "./components/QAForm.vue";
 import QAHeader from "./components/QAHeader.vue";
 import QAResults from "./components/QAResults.vue";
 import QAToDo from "./components/QAToDo.vue";
 import QALoading from "./components/QALoading.vue";
+import QAFormWrapper from "./components/QAForm/QAFormWrapper.vue";
 
 export default {
   components: {
-    QAForm,
     QAHeader,
     QAResults,
     QAToDo,
     QALoading,
+    QAFormWrapper,
   },
   data() {
     return {
