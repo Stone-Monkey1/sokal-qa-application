@@ -42,7 +42,11 @@ export default {
     };
   },
   methods: {
-    async runTests({ url, selectedTests }) {
+    async runTests(payload) {
+      console.log("Full test payload received:", payload);
+
+      const { url, selectedTests, mode } = payload;
+
       const API_URL =
         process.env.NODE_ENV === "production"
           ? "http://127.0.0.1:3000/run-tests"
@@ -52,17 +56,18 @@ export default {
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, selectedTests }),
+          body: JSON.stringify({ url, selectedTests, mode }),
         });
 
         this.results = await response.json();
       } catch (error) {
-        console.error("❌ Error running tests:", error);
+        console.error("Error running tests:", error);
         this.results = { error: "Failed to fetch results" };
       } finally {
         this.loading = false;
       }
     },
+
     toggleToDo(event) {
       if (event) {
         event.stopPropagation(); // Prevents accidental double events

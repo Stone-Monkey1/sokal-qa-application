@@ -42,7 +42,7 @@ export default {
   },
   data() {
     return {
-      currentForm: "website", // or "page"
+      currentForm: "website",
     };
   },
   methods: {
@@ -66,7 +66,7 @@ export default {
   width: 200px;
   padding: 0.4rem 1rem;
   cursor: pointer;
-  background-color: #eee;
+  background-color: #bab9b9;
   border: 1px solid #ccc;
   transition: background-color 0.2s;
 }

@@ -54,10 +54,8 @@ const homepageInteractionBarTest = require("./Tests/Homepage/homepageInteraction
 const homepageNavbarImgAltTagTest = require("./Tests/Homepage/homepageNavbarImgAltTagTest");
 const homepageNavbarImgResponsiveTest = require("./Tests/Homepage/homepageNavbarImgResponsiveTest");
 
-
 const getNavbarLinks = require("./Utility/getNavbarLinks");
 const getBodyImages = require("./Utility/getBodyImages");
-
 
 const app = express();
 app.use(express.json());
@@ -70,7 +68,7 @@ const navbarTests = {
   navbarH1CheckTest,
   navbarSpellCheckTest,
   navbarCheckVideo,
-  navbarDescriptionCheckTest
+  navbarDescriptionCheckTest,
 };
 
 const navbarImgTests = {
@@ -204,10 +202,69 @@ async function runTests(url, selectedTests) {
   await browser.close();
   return results;
 }
+async function runSinglePageTests(url, selectedTests) {
+  console.log("📄 Running SINGLE PAGE tests...");
+  const results = {};
+  executedTests.clear();
+
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+  });
+  await context.clearCookies();
+  await context.clearPermissions();
+
+  const page = await context.newPage();
+
+  console.log(`Navigating to: ${url}`);
+  await page.goto(url, {
+    timeout: 60000,
+    waitUntil: "networkidle",
+  });
+
+  results[url] = {};
+
+  const imageTestsSelected = Object.keys(navbarImgTests).some((t) =>
+    selectedTests.includes(t)
+  );
+
+  let images = null;
+  if (imageTestsSelected) {
+    images = await getBodyImages(page);
+  }
+
+  for (const testName of selectedTests) {
+    const testKey = `${testName}-${url}`;
+    if (executedTests.has(testKey)) continue;
+
+    executedTests.add(testKey);
+    try {
+      let result;
+      if (homepageTests[testName]) {
+        result = await homepageTests[testName](page);
+      } else if (navbarTests[testName]) {
+        result = await navbarTests[testName](page);
+      } else if (navbarImgTests[testName]) {
+        result = await navbarImgTests[testName](page, images);
+      }
+
+      if (result && result[url]) {
+        results[url] = { ...results[url], ...result[url] };
+      }
+    } catch (err) {
+      console.error(`Error running ${testName} on ${url}:`, err.message);
+    }
+  }
+
+  await browser.close();
+  return results;
+}
 
 app.post("/run-tests", async (req, res) => {
   console.log("Received request:", req.body);
-  const { url, selectedTests } = req.body;
+  const { url, selectedTests, mode } = req.body;
+  console.log("Recieved mode:", mode);
 
   if (!url) {
     console.error("Error: URL is missing");
@@ -215,7 +272,11 @@ app.post("/run-tests", async (req, res) => {
   }
 
   try {
-    const results = await runTests(url, selectedTests);
+    const results =
+      mode === "single"
+        ? await runSinglePageTests(url, selectedTests)
+        : await runTests(url, selectedTests);
+
     console.log("Test results:", results);
     res.json(results);
     executedTests.clear();

@@ -114,6 +114,7 @@ export default {
       this.$emit("run-tests", {
         url: this.url,
         selectedTests: this.selectedTests,
+        mode: "single"
       });
     },
     selectAllTests() {
