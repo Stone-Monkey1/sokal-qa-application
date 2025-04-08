@@ -57,6 +57,10 @@ export default {
 </script>
 
 <style>
+.error-message {
+  color: red;
+  margin-top: 5px;
+}
 .qa-form-toggle-buttons {
   display: flex;
   gap: 1rem;

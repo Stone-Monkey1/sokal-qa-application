@@ -39,6 +39,7 @@ function ensureChromiumInstalled() {
 }
 
 ensureChromiumInstalled();
+
 // --- App Setup ---
 const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
 const navbarH1CheckTest = require("./Tests/Navbar/navbarH1CheckTest");
@@ -88,13 +89,32 @@ const homepageTests = {
 console.log("Backend server starting...");
 console.log("PID is:", process.pid);
 
-// Handle crashes
 process.on("uncaughtException", (err) =>
   console.error("❌ Uncaught Exception:", err)
 );
 process.on("unhandledRejection", (reason) =>
   console.error("❌ Unhandled Rejection:", reason)
 );
+
+function normalizeUrlKey(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    url.hostname = url.hostname.replace(/^www\./, "");
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+function normalizeTestResultKeys(resultObj) {
+  const normalized = {};
+  for (const rawKey of Object.keys(resultObj)) {
+    const normalizedKey = normalizeUrlKey(rawKey);
+    normalized[normalizedKey] = resultObj[rawKey];
+  }
+  return normalized;
+}
 
 async function runTests(url, selectedTests) {
   console.log("Resetting test results...");
@@ -108,19 +128,13 @@ async function runTests(url, selectedTests) {
   });
   await context.clearCookies();
   await context.clearPermissions();
-
   const page = await context.newPage();
 
   console.log(`Navigating to homepage: ${url}`);
+
   await page.goto(url, {
-    timeout: 60000,
-    waitUntil: "networkidle",
-    referer: "",
-    noCache: true,
-    extraHTTPHeaders: {
-      "Cache-Control": "no-store",
-      Pragma: "no-cache",
-    },
+    timeout: 30000,
+    waitUntil: "domcontentloaded",
   });
 
   const navbarLinks = await getNavbarLinks(page);
@@ -130,23 +144,32 @@ async function runTests(url, selectedTests) {
     return { error: "Failed to retrieve navbar links" };
   }
 
-  const allPages = [url, ...navbarLinks];
+  const normalizedHomepageUrl = normalizeUrlKey(url);
+  const allPages = [
+    url,
+    ...navbarLinks.filter(
+      (link) => normalizeUrlKey(link) !== normalizedHomepageUrl
+    ),
+  ];
+
   const navbarTestsSelected = Object.keys(navbarTests).some((t) =>
     selectedTests.includes(t)
   );
   const imageTestsSelected = Object.keys(navbarImgTests).some((t) =>
     selectedTests.includes(t)
   );
+  results[normalizedHomepageUrl] = {};
 
-  results[url] = {};
   for (const testName of selectedTests) {
     if (homepageTests[testName]) {
       console.log(`Running homepage test: ${testName} on ${url}`);
       try {
         const result = await homepageTests[testName](page);
-        if (result) {
-          results[url] = { ...results[url], ...result[url] };
-        }
+        const normalizedResult = normalizeTestResultKeys(result || {});
+        results[normalizedHomepageUrl] = {
+          ...results[normalizedHomepageUrl],
+          ...normalizedResult[normalizedHomepageUrl],
+        };
       } catch (error) {
         console.error(`Error running ${testName} on homepage:`, error.message);
       }
@@ -155,19 +178,25 @@ async function runTests(url, selectedTests) {
 
   if (navbarTestsSelected || imageTestsSelected) {
     for (const link of allPages) {
+      const normalizedLink = normalizeUrlKey(link);
       try {
         console.log(`Navigating to: ${link}`);
         await page.goto(link, {
           waitUntil: "domcontentloaded",
-          timeout: 60000,
+          timeout: 40000,
         });
       } catch {
         console.error(`⚠️ Skipping ${link} due to timeout.`);
-        results[link] = { error: "Page load timeout" };
+        if (
+          !results[normalizedLink] ||
+          Object.keys(results[normalizedLink]).length === 0
+        ) {
+          results[normalizedLink] = { error: "Page load timeout" };
+        }
         continue;
       }
 
-      results[link] = results[link] || {};
+      results[normalizedLink] = results[normalizedLink] || {};
 
       let images = null;
       if (imageTestsSelected) {
@@ -178,8 +207,8 @@ async function runTests(url, selectedTests) {
         if (homepageTests[testName]) continue;
         const testKey = `${testName}-${link}`;
         if (executedTests.has(testKey)) continue;
-
         executedTests.add(testKey);
+
         console.log(`Running ${testName} on ${link}`);
         try {
           let result;
@@ -188,10 +217,11 @@ async function runTests(url, selectedTests) {
           } else if (navbarImgTests[testName]) {
             result = await navbarImgTests[testName](page, images);
           }
-
-          if (result && result[link]) {
-            results[link] = { ...results[link], ...result[link] };
-          }
+          const normalizedResult = normalizeTestResultKeys(result || {});
+          results[normalizedLink] = {
+            ...results[normalizedLink],
+            ...normalizedResult[normalizedLink],
+          };
         } catch (err) {
           console.error(`Error running ${testName} on ${link}:`, err.message);
         }
@@ -202,9 +232,11 @@ async function runTests(url, selectedTests) {
   await browser.close();
   return results;
 }
+
 async function runSinglePageTests(url, selectedTests) {
   console.log("📄 Running SINGLE PAGE tests...");
   const results = {};
+  const normalizedHomepageUrl = normalizeUrlKey(url);
   executedTests.clear();
 
   const browser = await chromium.launch({ headless: true });
@@ -214,30 +246,25 @@ async function runSinglePageTests(url, selectedTests) {
   });
   await context.clearCookies();
   await context.clearPermissions();
-
   const page = await context.newPage();
 
   console.log(`Navigating to: ${url}`);
+
   await page.goto(url, {
-    timeout: 60000,
-    waitUntil: "networkidle",
+    timeout: 30000,
+    waitUntil: "domcontentloaded",
   });
 
-  results[url] = {};
-
+  results[normalizedHomepageUrl] = {};
   const imageTestsSelected = Object.keys(navbarImgTests).some((t) =>
     selectedTests.includes(t)
   );
-
   let images = null;
-  if (imageTestsSelected) {
-    images = await getBodyImages(page);
-  }
+  if (imageTestsSelected) images = await getBodyImages(page);
 
   for (const testName of selectedTests) {
     const testKey = `${testName}-${url}`;
     if (executedTests.has(testKey)) continue;
-
     executedTests.add(testKey);
     try {
       let result;
@@ -248,10 +275,11 @@ async function runSinglePageTests(url, selectedTests) {
       } else if (navbarImgTests[testName]) {
         result = await navbarImgTests[testName](page, images);
       }
-
-      if (result && result[url]) {
-        results[url] = { ...results[url], ...result[url] };
-      }
+      const normalizedResult = normalizeTestResultKeys(result || {});
+      results[normalizedHomepageUrl] = {
+        ...results[normalizedHomepageUrl],
+        ...normalizedResult[normalizedHomepageUrl],
+      };
     } catch (err) {
       console.error(`Error running ${testName} on ${url}:`, err.message);
     }
@@ -277,8 +305,10 @@ app.post("/run-tests", async (req, res) => {
         ? await runSinglePageTests(url, selectedTests)
         : await runTests(url, selectedTests);
 
-    console.log("Test results:", results);
-    res.json(results);
+    const normalizedResults = normalizeTestResultKeys(results);
+
+    console.log("Test results:", normalizedResults);
+    res.json(normalizedResults);
     executedTests.clear();
     console.log("Executed tests cleared.");
   } catch (error) {

@@ -16,6 +16,7 @@
       v-model="url"
       placeholder="https://gosokal.com"
     />
+    <div v-if="urlError" class="error-message">{{ urlError }}</div>
     <div class="padding-1"></div>
     <h3>Select Tests:</h3>
     <div class="padding-quarter"></div>
@@ -109,16 +110,45 @@ export default {
     };
   },
   methods: {
+    normalizeUrl(rawUrl) {
+      try {
+        let urlToParse = rawUrl.trim();
+
+        // Add protocol if missing
+        if (!/^https?:\/\//i.test(urlToParse)) {
+          urlToParse = "https://" + urlToParse;
+        }
+
+        const parsed = new URL(urlToParse);
+
+        if (!parsed.hostname.startsWith("www.")) {
+          parsed.hostname = "www." + parsed.hostname;
+        }
+
+        return parsed.toString();
+      } catch (e) {
+        console.error("Invalid URL:", rawUrl);
+        return rawUrl;
+      }
+    },
     emitRunTests() {
-      this.$emit("tests-started");
-      this.$emit("run-tests", {
-        url: this.url,
-        selectedTests: this.selectedTests,
-        mode: "single"
-      });
+      const normalized = this.normalizeUrl(this.url);
+
+      try {
+        new URL(normalized); // Validates the final URL
+        this.urlError = "";
+        this.$emit("tests-started");
+        this.$emit("run-tests", {
+          url: normalized,
+          selectedTests: this.selectedTests,
+          mode: "single",
+        });
+      } catch (e) {
+        this.urlError =
+          "Please enter a valid URL (e.g., https://www.example.com)";
+      }
     },
     selectAllTests() {
-      // Grab all checkbox inputs with a `value` inside test checklist
       const checkboxes = this.$el.querySelectorAll(
         ".test-checklist input[type='checkbox'][value]"
       );
@@ -132,6 +162,4 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

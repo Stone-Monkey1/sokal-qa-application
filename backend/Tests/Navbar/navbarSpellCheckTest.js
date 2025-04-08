@@ -1,5 +1,7 @@
 const { execSync } = require("child_process");
 const fs = require("fs");
+const path = require("path");
+const os = require("os");
 
 async function navbarSpellCheckTest(page) {
   const url = page.url();
@@ -9,28 +11,42 @@ async function navbarSpellCheckTest(page) {
 
     console.log(`Checking spelling on ${url}`);
 
-    // Extract all text content from the page
     const textContent = await page.evaluate(() => document.body.innerText);
 
-    // Write extracted text to temp.txt
-    fs.writeFileSync("temp.txt", textContent);
-    console.log(`Saved text from ${url} to temp.txt`);
+    const tempDir = os.tmpdir();
+    const tempFilePath = path.join(tempDir, "temp.txt");
 
-    // Run aspell spell checker on temp.txt
+    fs.writeFileSync(tempFilePath, textContent);
+    console.log(`Saved text from ${url} to temp.txt at ${tempFilePath}`);
+
     let spellCheckReport;
     try {
       console.log(`Running aspell on temp.txt for ${url}...`);
 
-      // Execute aspell and capture output
-      spellCheckReport = execSync("aspell list < temp.txt", {
-        encoding: "utf-8",
-      }).trim();
+      const aspellExecutable = path.join(
+        __dirname,
+        "..",
+        "..",
+        "aspell-bin",
+        "aspell"
+      );
+      if (!fs.existsSync(aspellExecutable)) {
+        throw new Error(`Aspell binary not found at ${aspellExecutable}`);
+      }
+      
+
+      spellCheckReport = execSync(
+        `"${aspellExecutable}" list < "${tempFilePath}"`,
+        {
+          encoding: "utf-8",
+        }
+      );
 
       if (spellCheckReport) {
         console.log(`Spelling errors found on ${url}:\n`, spellCheckReport);
       } else {
         console.log(`No spelling errors found on ${url}.`);
-        spellCheckReport = ""; // Ensure we return an empty string instead of a message
+        spellCheckReport = "";
       }
     } catch (error) {
       spellCheckReport = error.stdout
@@ -39,8 +55,7 @@ async function navbarSpellCheckTest(page) {
       console.error(`Error running aspell on ${url}:`, spellCheckReport);
     }
 
-    // Clear temp.txt after processing
-    fs.writeFileSync("temp.txt", "");
+    fs.unlinkSync(tempFilePath);
 
     return {
       [url]: {
