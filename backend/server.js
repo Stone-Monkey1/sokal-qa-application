@@ -43,6 +43,7 @@ ensureChromiumInstalled();
 // --- App Setup ---
 const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
 const navbarH1CheckTest = require("./Tests/Navbar/navbarH1CheckTest");
+const navbarMetaDescTest = require("./Tests/Navbar/navbarMetaDescTest");
 const navbarImgAltTagTest = require("./Tests/Navbar/navbarImgAltTagTest");
 const navbarImgResponsiveTest = require("./Tests/Navbar/navbarImgResponsiveTest");
 const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
@@ -67,6 +68,7 @@ const executedTests = new Set();
 const navbarTests = {
   navbarTitleCheckTest,
   navbarH1CheckTest,
+  navbarMetaDescTest,
   navbarSpellCheckTest,
   navbarCheckVideo,
   navbarDescriptionCheckTest,
