@@ -5,10 +5,7 @@
       <button @click="copyToClipboard" class="copy-btn qa-btn flex-column">
         Copy JSON
       </button>
-      <button
-        @click="toggleAllAccordions"
-        class="accordion-open-button qa-btn"
-      >
+      <button @click="toggleAllAccordions" class="accordion-open-button qa-btn">
         {{ allAccordionsOpen ? "Close All" : "Open All" }}
       </button>
     </div>
@@ -58,11 +55,26 @@
                   </div>
                   <div class="flex-li--value">
                     <ul v-if="Array.isArray(value)">
-                      <li v-for="(error, index) in value" :key="index">
-                        {{ error }}
+                      <li v-for="(item, index) in value" :key="index">
+                        <div v-if="typeof item === 'string'">{{ item }}</div>
+                        <div v-else>
+                          <p><strong>Tag:</strong> {{ item.tag }}</p>
+                          <p><strong>Keyword:</strong> {{ item.keyword }}</p>
+                          <p><strong>Snippet:</strong></p>
+                          <p
+                            v-for="(line, i) in item.snippet.split('\n')"
+                            :key="i"
+                          >
+                            {{ line }}
+                          </p>
+                        </div>
                       </li>
                     </ul>
-                    <span v-else>{{ value }}</span>
+                    <span v-else
+                      ><p v-for="(line, i) in value.split('\n')" :key="i">
+                        {{ line }}
+                      </p></span
+                    >
                   </div>
                 </li>
               </ul>
@@ -129,7 +141,11 @@ export default {
               return !value.toLowerCase().includes("no issues found");
             }
             if (Array.isArray(value)) {
-              return value.length > 0; // Check if array contains any errors
+              return value.some(
+                (item) =>
+                  typeof item === "object" ||
+                  item !== "No keyword matches found."
+              );
             }
             return false;
           });
@@ -149,9 +165,10 @@ export default {
   },
   mounted() {
     // Automatically open URLs with no issues
+    console.log("🔍 QAResults.vue mounted with:", this.results);
     this.openAccordions = Object.entries(this.results)
       .filter(([, tests]) => !this.hasIssues(tests))
-      .map(([url]) => url); 
+      .map(([url]) => url);
   },
 };
 </script>
@@ -160,7 +177,6 @@ export default {
 .results {
   padding: 20px;
 }
-
 
 /* Accordion Styling */
 .accordion {

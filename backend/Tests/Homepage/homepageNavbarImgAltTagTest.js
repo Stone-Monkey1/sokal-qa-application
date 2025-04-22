@@ -15,9 +15,13 @@ async function homepageNavbarImgAltTagTest(page) {
 
     const altTags = [];
     const missingAltTags = [];
+    const { isBlacklistedImage } = require("../../Utility/imageBlacklist");
 
     for (const img of images) {
       const altText = await img.getAttribute("alt");
+
+      if (isBlacklistedImage(src)) continue;
+      
       const imgSrc = await img.getAttribute("src");
 
       if (altText) {

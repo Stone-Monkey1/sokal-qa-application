@@ -2,13 +2,7 @@
   <div class="qa-form">
     <h2>Single Page QA</h2>
     <div class="separator-div-small"></div>
-    <!-- Just adding this to make it easier to test things -->
-    <div class="padding-2-percent">
-      <a href="https://stone-monkey1.github.io/sokal-qa-playground/"
-        >https://stone-monkey1.github.io/sokal-qa-playground/</a
-      >
-    </div>
-
+ 
     <label for="url">Website Homepage URL:</label>
     <input
       class="website-url"
@@ -162,4 +156,4 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style src="./QAFormCSS.css"></style>

@@ -10,10 +10,14 @@ async function navbarImgAltTagTest(page, images) {
 
     const altTags = [];
     const missingAltTags = [];
+    const { isBlacklistedImage } = require("../../Utility/imageBlacklist");
 
     for (const img of images) {
-      const altText = await img.getAttribute("alt");
       const imgSrc = await img.getAttribute("src");
+
+      if (isBlacklistedImage(imgSrc)) continue;
+      
+      const altText = await img.getAttribute("alt");
 
       if (altText) {
         altTags.push(altText);

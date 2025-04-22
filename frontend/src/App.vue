@@ -8,7 +8,7 @@
       </div>
     </transition>
     <div class="padding-2-percent">
-      <QAFormWrapper
+      <QANavigation
         @run-tests="runTests"
         @tests-started="loading = true"
         @tests-completed="loading = false"
@@ -24,7 +24,7 @@ import QAHeader from "./components/QAHeader.vue";
 import QAResults from "./components/QAResults.vue";
 import QAToDo from "./components/QAToDo.vue";
 import QALoading from "./components/QALoading.vue";
-import QAFormWrapper from "./components/QAForm/QAFormWrapper.vue";
+import QANavigation from "./components/QANavigation.vue";
 
 export default {
   components: {
@@ -32,7 +32,7 @@ export default {
     QAResults,
     QAToDo,
     QALoading,
-    QAFormWrapper,
+    QANavigation,
   },
   data() {
     return {

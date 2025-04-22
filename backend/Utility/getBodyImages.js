@@ -3,21 +3,31 @@ async function getBodyImages(page) {
 
   console.log(`Fetching images from ${page.url()}`);
 
-  // Get all visible <img> elements NOT inside .navbar
-  const images = await page.locator("img:not(.navbar img)").all();
+  // Get all <img> elements on the page
+  const allImages = await page.locator("img").all();
 
   const filteredImages = [];
 
-  for (const img of images) {
-    const insideNavbar = await img.evaluate(
-      (el) => el.closest(".navbar") !== null
-    );
+  for (const img of allImages) {
+    const isInsideExcludedContainer = await img.evaluate((el) => {
+      const excludedSelectors = [
+        ".navbar",
+        "nav",
+        "header",
+        ".top-header",
+        ".nav-contact-toolbar",
+        ".model-container",
+        ".extruder-content"
+      ];
 
-    const insideHead = await img.evaluate((el) =>
+      return excludedSelectors.some((selector) => el.closest(selector));
+    });
+
+    const isInHead = await img.evaluate((el) =>
       el.ownerDocument.head.contains(el)
     );
 
-    if (!insideNavbar && !insideHead) {
+    if (!isInsideExcludedContainer && !isInHead) {
       filteredImages.push(img);
     }
   }
