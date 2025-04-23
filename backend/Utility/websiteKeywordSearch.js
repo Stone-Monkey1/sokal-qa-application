@@ -2,21 +2,11 @@ const { launchPage } = require("./browserContext");
 const getNavbarLinks = require("./getNavbarLinks");
 const { normalizeUrlKey } = require("./normalize");
 
-function highlightMatches(html, phrases) {
-  let highlighted = html;
-  phrases.forEach((phrase) => {
-    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(`(${escaped})`, "gi");
-    highlighted = highlighted.replace(regex, `<mark>$1</mark>`);
-  });
-  return highlighted;
-}
-
 async function websiteKeywordSearch(siteUrl, keywordString) {
   const { browser, page } = await launchPage();
   const keywords = keywordString
     .split("~")
-    .map((k) => k.trim())
+    .map((k) => k.trim().toLowerCase())
     .filter(Boolean);
 
   const results = {};
@@ -41,74 +31,47 @@ async function websiteKeywordSearch(siteUrl, keywordString) {
     try {
       await page.goto(link, { waitUntil: "domcontentloaded", timeout: 40000 });
     } catch (err) {
-      const key = normalizeUrlKey(link);
-      results[key] = [
-        {
-          url: link,
-          tag: null,
-          keyword: null,
-          snippet: `<p style="color:red;">Page load failed: ${err.message}</p>`,
-        },
-      ];
+      results[normalizeUrlKey(link)] = {
+        keywordCounts: { error: `Page load failed: ${err.message}` },
+      };
       continue;
     }
 
-    const found = await page.evaluate((keywords) => {
-      const matches = [];
+    const counts = await page.evaluate((keywords) => {
+      const countMap = {};
+      keywords.forEach((kw) => (countMap[kw] = 0));
+
       const walker = document.createTreeWalker(
         document.body,
-        NodeFilter.SHOW_ELEMENT
+        NodeFilter.SHOW_TEXT
       );
-
       let node;
       while ((node = walker.nextNode())) {
-        if (
-          ["P", "H1", "H2", "H3", "LI", "SPAN", "DIV"].includes(node.tagName) &&
-          node.innerText
-        ) {
-          const text = node.innerText.toLowerCase();
-          const foundKeyword = keywords.find((kw) =>
-            text.includes(kw.toLowerCase())
-          );
-          if (foundKeyword) {
-            matches.push({
-              tag: node.tagName,
-              text: node.innerText.trim(),
-              keyword: foundKeyword,
-            });
+        const text = node.textContent.toLowerCase();
+        keywords.forEach((kw) => {
+          const matches = text.match(new RegExp(`\\b${kw}\\b`, "gi"));
+          if (matches) {
+            countMap[kw] += matches.length;
           }
-        }
+        });
       }
 
-      return matches;
+      return countMap;
     }, keywords);
 
-    const key = normalizeUrlKey(link);
-    results[key] = results[key] || [];
-
-    found.forEach((match) => {
-      results[key].push({
-        url: link,
-        tag: match.tag,
-        keyword: match.keyword,
-        snippet: match.text,
-      });
-    });
+    const totalMatches = Object.values(counts).reduce(
+      (sum, count) => sum + count,
+      0
+    );
+    if (totalMatches > 0) {
+      results[normalizeUrlKey(link)] = {
+        keywordCounts: counts,
+      };
+    }
   }
 
   await browser.close();
-  const wrappedResults = {};
-
-  for (const [url, matches] of Object.entries(results)) {
-    wrappedResults[url] = {
-      keywordSearchResults: {
-        keywordMatches: matches.length
-          ? matches
-          : ["No keyword matches found."],
-      },
-    };
-  }
-  return wrappedResults;
+  return results;
 }
 
 module.exports = websiteKeywordSearch;

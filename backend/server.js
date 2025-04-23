@@ -111,7 +111,7 @@ app.post("/website-keyword-search", async (req, res) => {
   const { url, keywords } = req.body;
   try {
     const results = await websiteKeywordSearch(url, keywords);
-    res.json({ success: true, results });
+    res.json(results);
   } catch (err) {
     console.error("❌ Keyword search failed:", err);
     res.status(500).json({ success: false, error: err.message });

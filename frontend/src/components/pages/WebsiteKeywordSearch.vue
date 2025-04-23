@@ -16,7 +16,6 @@
       <div class="padding-quarter"></div>
       <textarea
         class="keyword-input"
-        type="textarea"
         v-model="keywords"
         placeholder="service~customers~Wilmington"
       ></textarea>
@@ -27,8 +26,6 @@
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
   name: "WebsiteKeywordSearch",
   data() {
@@ -36,34 +33,17 @@ export default {
       url: "",
       keywords: "",
       error: null,
-      loading: false,
     };
   },
   methods: {
-    async submitSearch() {
-      this.$emit("tests-started"); // 💥 Make loading appear instantly
-      this.loading = true;
-      this.error = null;
+    submitSearch() {
+      // These events are handled by App.vue
+      this.$emit("tests-started");
 
-      try {
-        const response = await axios.post(
-          "http://localhost:3000/website-keyword-search",
-          {
-            url: this.url,
-            keywords: this.keywords,
-          }
-        );
-
-        if (response.data.success) {
-          this.$emit("tests-completed", response.data.results);
-        } else {
-          this.error = "Search failed. Please try again.";
-        }
-      } catch (err) {
-        this.error = `Error: ${err.response?.data?.error || err.message}`;
-      } finally {
-        this.loading = false;
-      }
+      this.$emit("run-tests", {
+        url: this.url,
+        keywords: this.keywords,
+      });
     },
   },
 };

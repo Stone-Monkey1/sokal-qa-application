@@ -54,27 +54,57 @@
                     }}</strong>
                   </div>
                   <div class="flex-li--value">
-                    <ul v-if="Array.isArray(value)">
-                      <li v-for="(item, index) in value" :key="index">
-                        <div v-if="typeof item === 'string'">{{ item }}</div>
-                        <div v-else>
-                          <p><strong>Tag:</strong> {{ item.tag }}</p>
-                          <p><strong>Keyword:</strong> {{ item.keyword }}</p>
-                          <p><strong>Snippet:</strong></p>
-                          <p
-                            v-for="(line, i) in item.snippet.split('\n')"
-                            :key="i"
+                    <div class="flex-li--value">
+                      <!-- Handle arrays -->
+                      <ul v-if="Array.isArray(value)">
+                        <li v-for="(item, index) in value" :key="index">
+                          <div v-if="typeof item === 'string'">
+                            {{ item }}
+                          </div>
+                          <div
+                            v-else-if="
+                              typeof item === 'object' && item !== null
+                            "
                           >
-                            {{ line }}
-                          </p>
+                            <p><strong>Tag:</strong> {{ item.tag }}</p>
+                            <p><strong>Keyword:</strong> {{ item.keyword }}</p>
+                            <p><strong>Snippet:</strong></p>
+                            <template v-if="typeof item.snippet === 'string'">
+                              <p
+                                v-for="(line, i) in item.snippet.split('\n')"
+                                :key="i"
+                              >
+                                {{ line }}
+                              </p>
+                            </template>
+                            <template v-else>
+                              <p>{{ item.snippet }}</p>
+                            </template>
+                          </div>
+                        </li>
+                      </ul>
+
+                      <!-- Handle keywordCounts object (new case) -->
+                      <div
+                        v-else-if="typeof value === 'object' && value !== null"
+                      >
+                        <div v-for="(count, keyword) in value" :key="keyword">
+                          {{ capitalize(keyword) }}: {{ count }}
                         </div>
-                      </li>
-                    </ul>
-                    <span v-else
-                      ><p v-for="(line, i) in value.split('\n')" :key="i">
-                        {{ line }}
-                      </p></span
-                    >
+                      </div>
+
+                      <!-- Handle simple string fallback -->
+                      <div v-else-if="typeof value === 'string'">
+                        <p v-for="(line, i) in value.split('\n')" :key="i">
+                          {{ line }}
+                        </p>
+                      </div>
+
+                      <!-- Fallback for numbers or unexpected types -->
+                      <div v-else>
+                        {{ value }}
+                      </div>
+                    </div>
                   </div>
                 </li>
               </ul>
@@ -134,9 +164,23 @@ export default {
       }
     },
     hasIssues(tests) {
-      return Object.values(tests).some((test) => {
-        if (typeof test === "object" && test !== null) {
-          return Object.values(test).some((value) => {
+      const testEntries = Object.entries(tests);
+
+      return testEntries.some(([testName, testData]) => {
+        if (
+          testName === "keywordCounts" &&
+          typeof testData === "object" &&
+          testData !== null
+        ) {
+          // Keyword counts should be treated as issues if any count > 0
+          return Object.values(testData).some(
+            (count) => typeof count === "number" && count > 0
+          );
+        }
+
+        // General object-based checks
+        if (typeof testData === "object" && testData !== null) {
+          return Object.values(testData).some((value) => {
             if (typeof value === "string") {
               return !value.toLowerCase().includes("no issues found");
             }
@@ -147,9 +191,15 @@ export default {
                   item !== "No keyword matches found."
               );
             }
+            if (typeof value === "object") {
+              return Object.values(value).some(
+                (v) => typeof v === "number" && v > 0
+              );
+            }
             return false;
           });
         }
+
         return false;
       });
     },
@@ -170,6 +220,9 @@ export default {
       .filter(([, tests]) => !this.hasIssues(tests))
       .map(([url]) => url);
   },
+  capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  },
 };
 </script>
 
@@ -177,12 +230,10 @@ export default {
 .results {
   padding: 20px;
 }
-
 /* Accordion Styling */
 .accordion {
   margin-bottom: 10px;
 }
-
 .accordion-header {
   background: #f4f4f4;
   padding: 10px;

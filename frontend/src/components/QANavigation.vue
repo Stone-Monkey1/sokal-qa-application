@@ -15,12 +15,16 @@
       >
         Single Page QA
       </button>
-      <a
-        target="_blank"
-        href="https://templates.sokalsites.com/sokal-utility-styles"
+      <!-- <button
+        class="qa-btn"
+        :class="{ active: currentView === 'css' }"
+        @click="currentView = 'css'"
       >
-        <button class="qa-btn">Sokal CSS</button>
-      </a>
+        Sokal CSS
+      </button> -->
+
+      <button class="qa-btn" @click="openSokalCSS">Sokal CSS</button>
+
       <button
         class="qa-btn"
         :class="{ active: currentView === 'wordSearch' }"
@@ -43,16 +47,19 @@
       @tests-completed="$emit('tests-completed')"
     />
     <SokalCSSClasses v-else-if="currentView === 'css'" />
-    <WebsiteKeywordSearch v-else-if="currentView === 'wordSearch'"
-    @tests-started="$emit('tests-started')"
-    @tests-completed="$emit('tests-completed', $event)" />
+    <WebsiteKeywordSearch
+      v-else-if="currentView === 'wordSearch'"
+      @run-tests="$emit('run-tests', $event)"
+      @tests-started="$emit('tests-started')"
+      @tests-completed="$emit('tests-completed')"
+    />
   </div>
 </template>
 
 <script>
 import QAFormWebsite from "./QAForm/QAFormWebsite.vue";
 import QAFormPage from "./QAForm/QAFormPage.vue";
-import SokalCSSClasses from "./pages/SokalCSSClasses.vue";
+import SokalCSSClasses from "./pages/SokalCssClasses/SokalCSSClasses.vue";
 import WebsiteKeywordSearch from "./pages/WebsiteKeywordSearch.vue";
 
 export default {
@@ -66,6 +73,14 @@ export default {
     return {
       currentView: "website",
     };
+  },
+  methods: {
+    openSokalCSS() {
+      const { shell } = window.require("electron");
+      shell.openExternal(
+        "https://templates.sokalsites.com/sokal-utility-styles"
+      );
+    },
   },
 };
 </script>
