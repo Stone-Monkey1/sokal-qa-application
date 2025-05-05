@@ -10,7 +10,8 @@
     "make": "npm run clean && electron-forge make",
     "build-app": "npm run clean && cd frontend && npm run build && cd .. && electron-builder",
     "publish-app": "electron-builder --publish=always",
-    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+    "install-all": "npm install &&npm run setup-node-bin && cd frontend && npm install && cd ../backend && npm install",
+    "setup-node-bin": "node install-scripts/download-node.js"
   },
   "dependencies": {
     "axios": "^1.8.3",
