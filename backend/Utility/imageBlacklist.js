@@ -17,7 +17,8 @@ const imageBlacklistPatterns = [
   "scorecardresearch",
   "sync.gosokal",
   "fonts.gstatic",
-  "s3.amazonaws"
+  "s3.amazonaws",
+  "clickheretesting.com"
 ];
 
 function isBlacklistedImage(src) {
