@@ -129,6 +129,14 @@
           <label>
             <input
               type="checkbox"
+              value="navbarFormTitle"
+              v-model="selectedTests"
+            />
+            Form Check
+          </label>
+          <label>
+            <input
+              type="checkbox"
               value="navbarCheckVideo"
               v-model="selectedTests"
             />

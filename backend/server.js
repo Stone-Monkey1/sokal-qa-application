@@ -24,6 +24,7 @@ const navbarImgResponsiveTest = require("./Tests/Navbar/navbarImgResponsiveTest"
 const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
 const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
 const navbarDescriptionCheckTest = require("./Tests/Navbar/navbarDescriptionCheckTest");
+const navbarFormTitle = require("./Tests/Navbar/navbarFormTitle");
 
 const homepageQuickLinksTest = require("./Tests/Homepage/homepageQuickLinksTest");
 const homepageTabbedSearchFilterTest = require("./Tests/Homepage/homepageTabbedSearchFilterTest");
@@ -64,6 +65,7 @@ const navbarTests = {
   navbarSpellCheckTest,
   navbarCheckVideo,
   navbarDescriptionCheckTest,
+  navbarFormTitle
 };
 
 const navbarImgTests = {
