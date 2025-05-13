@@ -11,7 +11,8 @@
       placeholder="https://gosokal.com"
     />
 
-    <div class="padding-1"></div>
+    <p>Instructions:</p>
+    <p>Ensure that your style element is wrapped in a comment like "FinanceApplication BEGIN" and has "FinanceApplication END" the "BEGIN" and "END" act as markers.</p>
     <button class="qa-btn" @click="runCSSAudit">Run Audit</button>
 
     <div

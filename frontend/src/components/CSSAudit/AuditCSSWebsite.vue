@@ -2,7 +2,6 @@
   <div class="css-audit-container qa-form">
     <h2>CSS Audit Website</h2>
     <div class="separator-div-small"></div>
-
     <label for="url">Website Homepage URL:</label>
     <input
       class="website-url"
@@ -10,7 +9,8 @@
       v-model="url"
       placeholder="https://gosokal.com"
     />
-
+    <p>Instructions:</p>
+    <p>Ensure that each CSS file is wrapped in a comment like "Sitewide BEGIN" and has "Sitewide END" the "BEGIN" and "END" act as markers.</p>
     <div class="padding-1"></div>
     <button class="qa-btn" @click="runCSSAudit">Run Audit</button>
 
