@@ -1,8 +1,8 @@
-const { launchPage } = require("./browserContext");
-const getNavbarLinks = require("./getNavbarLinks");
-const { normalizeUrlKey } = require("./normalize");
+const { launchPage } = require("../Utility/browserContext");
+const getNavbarLinks = require("../Utility/getNavbarLinks");
+const { normalizeUrlKey } = require("../Utility/normalize");
 
-async function websiteKeywordSearch(siteUrl, keywordString) {
+async function websiteKeywordSearch(siteUrl, keywordString, mode = "website") {
   const { browser, page } = await launchPage();
   const keywords = keywordString
     .split("~")
@@ -24,8 +24,10 @@ async function websiteKeywordSearch(siteUrl, keywordString) {
   } catch (err) {
     console.warn("Failed to extract navbar links:", err);
   }
-
-  const allPages = [siteUrl, ...navbarLinks.filter((link) => link !== siteUrl)];
+  const allPages =
+    mode === "single"
+      ? [siteUrl]
+      : [siteUrl, ...navbarLinks.filter((link) => link !== siteUrl)];
 
   for (const link of allPages) {
     try {
@@ -41,20 +43,16 @@ async function websiteKeywordSearch(siteUrl, keywordString) {
       const countMap = {};
       keywords.forEach((kw) => (countMap[kw] = 0));
 
-      const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT
-      );
-      let node;
-      while ((node = walker.nextNode())) {
-        const text = node.textContent.toLowerCase();
-        keywords.forEach((kw) => {
-          const matches = text.match(new RegExp(`\\b${kw}\\b`, "gi"));
-          if (matches) {
-            countMap[kw] += matches.length;
-          }
-        });
-      }
+      const html = document.body.outerHTML.toLowerCase();
+
+      keywords.forEach((kw) => {
+        const matches = html.match(
+          new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")
+        );
+        if (matches) {
+          countMap[kw] += matches.length;
+        }
+      });
 
       return countMap;
     }, keywords);

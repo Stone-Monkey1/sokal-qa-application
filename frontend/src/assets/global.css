@@ -8,9 +8,6 @@
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
-#app a {
-  font-size: 1.4rem;
-}
 .flex-row {
   display: flex;
   flex-direction: row;
@@ -152,6 +149,8 @@
   cursor: pointer;
   border-radius: 5px;
   margin: 0px 5px 15px 5px;
+  text-decoration: none;
+  text-align: center;
 }
 
 .qa-btn:hover {

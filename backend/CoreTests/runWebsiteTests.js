@@ -20,6 +20,8 @@ module.exports = async function runWebsiteTests(
   results[homepageKey] = {};
 
   await page.goto(url, { timeout: 30000, waitUntil: "domcontentloaded" });
+  
+
   const navbarLinks = await getNavbarLinks(page);
 
   const allPages = [

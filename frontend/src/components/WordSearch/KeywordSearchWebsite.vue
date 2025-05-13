@@ -3,7 +3,6 @@
     <h2>Website Keyword Search</h2>
     <div class="separator-div-small"></div>
     <label for="url">Website Homepage URL:</label>
-
     <input
       class="website-url"
       type="text"
@@ -37,12 +36,12 @@ export default {
   },
   methods: {
     submitSearch() {
-      // These events are handled by App.vue
       this.$emit("tests-started");
 
       this.$emit("run-tests", {
         url: this.url,
         keywords: this.keywords,
+        mode: "website"
       });
     },
   },

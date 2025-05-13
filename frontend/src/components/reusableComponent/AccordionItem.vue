@@ -43,6 +43,9 @@ export default {
   border-bottom: 1px solid #ccc;
   padding: 0.5rem;
 }
+.accordion-header a {
+  font-size: 1.4rem;
+}
 .accordion-body {
   padding: 0.5rem 0;
 }

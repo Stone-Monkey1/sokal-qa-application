@@ -5,8 +5,8 @@ const os = require("os");
 
 // Import modules
 const ensureChromiumInstalled = require("./Utility/chromiumInstaller");
-const runSinglePageTests = require("./Tests/runSinglePageTests");
-const runWebsiteTests = require("./Tests/runWebsiteTests");
+const runSinglePageTests = require("./CoreTests/runSinglePageTests");
+const runWebsiteTests = require("./CoreTests/runWebsiteTests");
 const {
   normalizeUrlKey,
   normalizeTestResultKeys,
@@ -14,7 +14,7 @@ const {
 
 const getNavbarLinks = require("./Utility/getNavbarLinks");
 const getBodyImages = require("./Utility/getBodyImages");
-const websiteKeywordSearch = require("./Utility/websiteKeywordSearch");
+const websiteKeywordSearch = require("./AdditionalTests/websiteKeywordSearch");
 
 // Load all tests
 const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
@@ -26,12 +26,14 @@ const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
 const navbarDescriptionCheckTest = require("./Tests/Navbar/navbarDescriptionCheckTest");
 const navbarFormTitle = require("./Tests/Navbar/navbarFormTitle");
 
-const homepageQuickLinksTest = require("./Tests/Homepage/homepageQuickLinksTest");
-const homepageTabbedSearchFilterTest = require("./Tests/Homepage/homepageTabbedSearchFilterTest");
-const homepageVehicleCarouselTest = require("./Tests/Homepage/homepageVehicleCarouselTest");
-const homepageInteractionBarTest = require("./Tests/Homepage/homepageInteractionBarTest");
-const homepageNavbarImgAltTagTest = require("./Tests/Homepage/homepageNavbarImgAltTagTest");
-const homepageNavbarImgResponsiveTest = require("./Tests/Homepage/homepageNavbarImgResponsiveTest");
+const homepageQuickLinksTest = require("./CoreTests/Homepage/homepageQuickLinksTest");
+const homepageTabbedSearchFilterTest = require("./CoreTests/Homepage/homepageTabbedSearchFilterTest");
+const homepageVehicleCarouselTest = require("./CoreTests/Homepage/homepageVehicleCarouselTest");
+const homepageInteractionBarTest = require("./CoreTests/Homepage/homepageInteractionBarTest");
+const homepageNavbarImgAltTagTest = require("./CoreTests/Homepage/homepageNavbarImgAltTagTest");
+const homepageNavbarImgResponsiveTest = require("./CoreTests/Homepage/homepageNavbarImgResponsiveTest");
+
+const cssAudit = require("./AdditionalTests/cssAudit");
 
 // Chromium Setup
 const isProduction = require.main?.filename.includes(".app");
@@ -110,9 +112,9 @@ app.post("/run-tests", async (req, res) => {
 });
 
 app.post("/website-keyword-search", async (req, res) => {
-  const { url, keywords } = req.body;
+  const { url, keywords, mode } = req.body;
   try {
-    const results = await websiteKeywordSearch(url, keywords);
+    const results = await websiteKeywordSearch(url, keywords, mode);
     res.json(results);
   } catch (err) {
     console.error("❌ Keyword search failed:", err);

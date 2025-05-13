@@ -2,53 +2,39 @@
   <div>
     <div class="qa-form-toggle-buttons">
       <button
+        v-for="parent in parentViews"
+        :key="parent.id"
         class="qa-btn"
-        :class="{ active: currentView === 'website' }"
-        @click="currentView = 'website'"
+        :class="{ active: currentParent === parent.id }"
+        @click="setParent(parent.id)"
       >
-        Website QA
+        {{ parent.label }}
       </button>
-      <button
+      <a
         class="qa-btn"
-        :class="{ active: currentView === 'page' }"
-        @click="currentView = 'page'"
-      >
-        Single Page QA
-      </button>
-      <!-- <button
-        class="qa-btn"
-        :class="{ active: currentView === 'css' }"
-        @click="currentView = 'css'"
+        href="https://templates.sokalsites.com/sokal-utility-styles"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Sokal CSS
-      </button> -->
+      </a>
+    </div>
 
-      <button class="qa-btn" @click="openSokalCSS">Sokal CSS</button>
-
+    <div v-if="currentParent">
       <button
+        v-for="mode in subViews"
+        :key="mode.id"
         class="qa-btn"
-        :class="{ active: currentView === 'wordSearch' }"
-        @click="currentView = 'wordSearch'"
+        :class="{ active: currentView === `${currentParent}-${mode.id}` }"
+        @click="currentView = `${currentParent}-${mode.id}`"
       >
-        Word Search
+        {{ mode.label }}
       </button>
     </div>
 
-    <QAFormWebsite
-      v-if="currentView === 'website'"
-      @run-tests="$emit('run-tests', $event)"
-      @tests-started="$emit('tests-started')"
-      @tests-completed="$emit('tests-completed')"
-    />
-    <QAFormPage
-      v-else-if="currentView === 'page'"
-      @run-tests="$emit('run-tests', $event)"
-      @tests-started="$emit('tests-started')"
-      @tests-completed="$emit('tests-completed')"
-    />
-    <SokalCSSClasses v-else-if="currentView === 'css'" />
-    <WebsiteKeywordSearch
-      v-else-if="currentView === 'wordSearch'"
+    <component
+      :is="activeComponent"
+      v-if="activeComponent"
       @run-tests="$emit('run-tests', $event)"
       @tests-started="$emit('tests-started')"
       @tests-completed="$emit('tests-completed')"
@@ -59,51 +45,46 @@
 <script>
 import QAFormWebsite from "./QAForm/QAFormWebsite.vue";
 import QAFormPage from "./QAForm/QAFormPage.vue";
-import SokalCSSClasses from "./pages/SokalCssClasses/SokalCSSClasses.vue";
-import WebsiteKeywordSearch from "./pages/WebsiteKeywordSearch.vue";
+import KeywordSearchWebsite from "./WordSearch/KeywordSearchWebsite.vue";
+import KeywordSearchPage from "./WordSearch/KeywordSearchPage.vue"
+import AuditCSSWebsite from "./CSSAudit/AuditCSSWebsite.vue";
+import AuditCSSPage from "./CSSAudit/AuditCSSPage.vue";
+
 
 export default {
-  components: {
-    QAFormWebsite,
-    QAFormPage,
-    SokalCSSClasses,
-    WebsiteKeywordSearch,
-  },
   data() {
     return {
-      currentView: "website",
+      currentParent: "qa", // default selected parent
+      currentView: "qa-website",
+      parentViews: [
+        { id: "qa", label: "QA" },
+        { id: "wordSearch", label: "Word Search" },
+        { id: "auditCSS", label: "CSS Audit" },
+      ],
+      subViews: [
+        { id: "website", label: "Website" },
+        { id: "page", label: "Single Page" },
+      ],
+      componentMap: {
+        "qa-website": QAFormWebsite,
+        "qa-page": QAFormPage,
+        "wordSearch-website": KeywordSearchWebsite,
+        "wordSearch-page": KeywordSearchPage,
+        "auditCSS-website": AuditCSSWebsite,
+        "auditCSS-page": AuditCSSPage,
+      },
     };
   },
+  computed: {
+    activeComponent() {
+      return this.componentMap[this.currentView] || null;
+    },
+  },
   methods: {
-    openSokalCSS() {
-      const { shell } = window.require("electron");
-      shell.openExternal(
-        "https://templates.sokalsites.com/sokal-utility-styles"
-      );
+    setParent(parentId) {
+      this.currentParent = parentId;
+      this.currentView = `${parentId}-website`;
     },
   },
 };
 </script>
-
-<style scoped>
-.qa-form-toggle-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-#app .qa-form-toggle-buttons a {
-  font-size: 1rem;
-}
-.qa-btn {
-  width: 200px;
-  padding: 0.4rem 1rem;
-  cursor: pointer;
-  background-color: #bab9b9;
-  border: 1px solid #ccc;
-  transition: background-color 0.2s;
-}
-.qa-btn.active {
-  background-color: #7575f8;
-  font-weight: bold;
-}
-</style>
