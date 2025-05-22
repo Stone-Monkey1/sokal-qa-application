@@ -37,9 +37,22 @@ export default {
       console.log("Full test payload received:", payload);
 
       const isKeywordSearch = !!payload.keywords;
-      const API_URL = isKeywordSearch
-        ? "http://localhost:3000/website-keyword-search"
-        : "http://localhost:3000/run-tests";
+      const isCssAudit =
+        Array.isArray(payload.selectedTests) &&
+        payload.selectedTests.length === 1 &&
+        payload.selectedTests[0] === "cssAudit";
+
+      let API_URL;
+
+      if (isKeywordSearch) {
+        API_URL = "http://localhost:3000/website-keyword-search";
+      } else if (isCssAudit && payload.mode === "single") {
+        API_URL = "http://localhost:3000/css-audit";
+        // Optional: Remove `selectedTests` since /css-audit doesn't need it
+        delete payload.selectedTests;
+      } else {
+        API_URL = "http://localhost:3000/run-tests";
+      }
 
       try {
         const response = await fetch(API_URL, {

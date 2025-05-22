@@ -1,5 +1,6 @@
 async function getNavbarLinks(page) {
   console.log("Fetching fresh navbar links...");
+  const baseHost = new URL(page.url()).host;
 
   const links = await page.evaluate(() => {
     const navLinks = document.querySelectorAll(".navbar .navbar-nav a");
@@ -13,19 +14,24 @@ async function getNavbarLinks(page) {
       "vehicles?",
       "new-inventory",
       "used-inventory",
-      "specials"
+      "specials",
     ];
 
-    let hrefs = [...new Set([...navLinks].map((link) => link.href.trim()))];
-
-    hrefs = hrefs.filter(
-      (href) => !excludedKeywords.some((keyword) => href.includes(keyword))
+    return [...new Set([...navLinks].map((link) => link.href.trim()))].filter(
+      (href) =>
+        href &&
+        !href.startsWith("#") &&
+        !excludedKeywords.some((keyword) => href.includes(keyword))
     );
-
-    return hrefs.filter((href) => href && !href.startsWith("#")); // Remove empty & anchor links
   });
 
-  return links;
+  return links.map((link) => {
+    const linkHost = new URL(link).host;
+    return {
+      url: link,
+      isOffSite: linkHost !== baseHost,
+    };
+  });
 }
 
 module.exports = getNavbarLinks;

@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const os = require("os");
 
-// Import modules
+// Import Utility
 const ensureChromiumInstalled = require("./Utility/chromiumInstaller");
 const runSinglePageTests = require("./CoreTests/runSinglePageTests");
 const runWebsiteTests = require("./CoreTests/runWebsiteTests");
@@ -11,20 +11,22 @@ const {
   normalizeUrlKey,
   normalizeTestResultKeys,
 } = require("./Utility/normalize");
+const { launchPage } = require("./Utility/browserContext");
+
 
 const getNavbarLinks = require("./Utility/getNavbarLinks");
 const getBodyImages = require("./Utility/getBodyImages");
 const websiteKeywordSearch = require("./AdditionalTests/websiteKeywordSearch");
 
 // Load all tests
-const navbarTitleCheckTest = require("./Tests/Navbar/navbarTitleCheckTest");
-const navbarH1CheckTest = require("./Tests/Navbar/navbarH1CheckTest");
-const navbarImgAltTagTest = require("./Tests/Navbar/navbarImgAltTagTest");
-const navbarImgResponsiveTest = require("./Tests/Navbar/navbarImgResponsiveTest");
-const navbarSpellCheckTest = require("./Tests/Navbar/navbarSpellCheckTest");
-const navbarCheckVideo = require("./Tests/Navbar/navbarCheckVideo");
-const navbarDescriptionCheckTest = require("./Tests/Navbar/navbarDescriptionCheckTest");
-const navbarFormTitle = require("./Tests/Navbar/navbarFormTitle");
+const navbarTitleCheckTest = require("./CoreTests/Navbar/navbarTitleCheckTest");
+const navbarH1CheckTest = require("./CoreTests/Navbar/navbarH1CheckTest");
+const navbarImgAltTagTest = require("./CoreTests/Navbar/navbarImgAltTagTest");
+const navbarImgResponsiveTest = require("./CoreTests/Navbar/navbarImgResponsiveTest");
+const navbarSpellCheckTest = require("./CoreTests/Navbar/navbarSpellCheckTest");
+const navbarCheckVideo = require("./CoreTests/Navbar/navbarCheckVideo");
+const navbarDescriptionCheckTest = require("./CoreTests/Navbar/navbarDescriptionCheckTest");
+const navbarFormTitle = require("./CoreTests/Navbar/navbarFormTitle");
 
 const homepageQuickLinksTest = require("./CoreTests/Homepage/homepageQuickLinksTest");
 const homepageTabbedSearchFilterTest = require("./CoreTests/Homepage/homepageTabbedSearchFilterTest");
@@ -67,7 +69,7 @@ const navbarTests = {
   navbarSpellCheckTest,
   navbarCheckVideo,
   navbarDescriptionCheckTest,
-  navbarFormTitle
+  navbarFormTitle,
 };
 
 const navbarImgTests = {
@@ -118,6 +120,52 @@ app.post("/website-keyword-search", async (req, res) => {
     res.json(results);
   } catch (err) {
     console.error("❌ Keyword search failed:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.post("/css-audit", async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ error: "URL is required" });
+  try {
+    console.log(`🔍 Running CSS audit on: ${url}`);
+
+    const { browser, page } = await launchPage();
+
+    try {
+      await page.goto(url, { waitUntil: "load", timeout: 40000 });
+    } catch (err) {
+      console.warn(
+        "Primary navigation failed. Retrying with domcontentloaded..."
+      );
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    }
+
+    console.log("✅ Page loaded successfully. Starting audit...");
+
+    let auditResults;
+
+    try {
+      auditResults = await cssAudit(page);
+    } catch (auditErr) {
+      console.error(
+        "❌ cssAudit(page) threw an error:",
+        auditErr.stack || auditErr.message
+      );
+      await browser.close();
+      return res.status(500).json({ error: "CSS audit execution failed." });
+    }
+
+    await browser.close();
+
+    if (!auditResults) {
+      console.log("✅ CSS audit found no issues.");
+      return res.json({ [url]: { cssAudit: null } });
+    }
+
+    const normalized = normalizeTestResultKeys(auditResults, normalizeUrlKey);
+    res.json(normalized);
+  } catch (err) {
+    console.error("❌ CSS Audit failed:", err.stack || err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });

@@ -99,7 +99,7 @@ export default {
       this.flatResults = { unused: {}, overwritten: {} };
 
       try {
-        const response = await fetch("http://localhost:3000/run-tests", {
+        const response = await fetch("http://localhost:3000/css-audit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

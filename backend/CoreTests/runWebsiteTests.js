@@ -20,13 +20,14 @@ module.exports = async function runWebsiteTests(
   results[homepageKey] = {};
 
   await page.goto(url, { timeout: 30000, waitUntil: "domcontentloaded" });
-  
 
-  const navbarLinks = await getNavbarLinks(page);
+  const navbarLinkObjects = await getNavbarLinks(page);
 
   const allPages = [
-    url,
-    ...navbarLinks.filter((link) => normalizeUrlKey(link) !== homepageKey),
+    { url, isOffSite: false },
+    ...navbarLinkObjects.filter(
+      ({ url: link }) => normalizeUrlKey(link) !== homepageKey
+    ),
   ];
   const imageTestsSelected = Object.keys(navbarImgTests).some((t) =>
     selectedTests.includes(t)
@@ -43,10 +44,18 @@ module.exports = async function runWebsiteTests(
     }
   }
 
-  for (const link of allPages) {
-    const key = normalizeUrlKey(link);
+  for (const { url: linkUrl, isOffSite } of allPages) {
+    const key = normalizeUrlKey(linkUrl);
+
+    if (isOffSite) {
+      results[key] = { message: "Link is Off-Site" };
+      continue;
+    }
     try {
-      await page.goto(link, { waitUntil: "domcontentloaded", timeout: 40000 });
+      await page.goto(linkUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 40000,
+      });
     } catch {
       results[key] = { error: "Page load timeout" };
       continue;
@@ -57,7 +66,7 @@ module.exports = async function runWebsiteTests(
 
     for (const testName of selectedTests) {
       if (homepageTests[testName]) continue;
-      const testKey = `${testName}-${link}`;
+      const testKey = `${testName}-${linkUrl}`;
       if (executedTests.has(testKey)) continue;
       executedTests.add(testKey);
 
