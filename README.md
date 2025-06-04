@@ -51,7 +51,7 @@ New Setup
 Getting the app on your computer:
 1. Don't click to unzip the app. Explanation: I'm not an apple approved devloper, so I wasn't able to notarize this application. To keep you safe Apple will quarantine the app.
 2. Instead go into your terminal and type "cd ~/Downloads"
-3. Then "~/Downloads unzip qaApp-1.0.10-arm64-mac.zip"
+3. Then "~/Downloads unzip qaApp-x.x.xx-arm64-mac.zip" REPLACE THE X's WITH THE VERSION YOU DOWNLOADED!!!!!
 4. Then, while still in Downloads, run "xattr -rd com.apple.quarantine ~/Downloads/qaApp.app"
 5. You my also need to go to System Settings -> Privacy & Security
 6. Scroll to Security and look for "sokal-qa-application" was blocked from use because it is not from an identified developer.
