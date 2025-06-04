@@ -1,4 +1,4 @@
-How to get the project on your computer:
+How to get the code on your computer:
 
 1. Open the console in VSCode.
 2. Run "git clone https://github.com/Stone-Monkey1/sokal-qa-application.git"
