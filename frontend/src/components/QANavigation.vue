@@ -20,7 +20,7 @@
       </a>
     </div>
 
-    <div v-if="currentParent">
+    <div v-if="currentParent !== 'toolsDirectory'">
       <button
         v-for="mode in subViews"
         :key="mode.id"
@@ -49,6 +49,7 @@ import KeywordSearchWebsite from "./WordSearch/KeywordSearchWebsite.vue";
 import KeywordSearchPage from "./WordSearch/KeywordSearchPage.vue"
 import AuditCSSWebsite from "./CSSAudit/AuditCSSWebsite.vue";
 import AuditCSSPage from "./CSSAudit/AuditCSSPage.vue";
+import ToolsDirectoryWebsite from "./ToolsDirectory/ToolsDirectoryWebsite.vue";
 
 
 export default {
@@ -60,6 +61,7 @@ export default {
         { id: "qa", label: "QA" },
         { id: "wordSearch", label: "Word Search" },
         { id: "auditCSS", label: "CSS Audit" },
+        { id: "toolsDirectory", label: "Tools Directory" },
       ],
       subViews: [
         { id: "website", label: "Website" },
@@ -72,6 +74,7 @@ export default {
         "wordSearch-page": KeywordSearchPage,
         "auditCSS-website": AuditCSSWebsite,
         "auditCSS-page": AuditCSSPage,
+        "toolsDirectory-website": ToolsDirectoryWebsite,
       },
     };
   },
