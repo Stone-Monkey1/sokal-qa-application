@@ -27,7 +27,13 @@ async function websiteKeywordSearch(siteUrl, keywordString, mode = "website") {
   const allPages =
     mode === "single"
       ? [siteUrl]
-      : [siteUrl, ...navbarLinks.filter((link) => link !== siteUrl)];
+      : [
+    siteUrl,
+    ...navbarLinks
+      .map((obj) => (typeof obj === "string" ? obj : obj.url))
+      .filter((url) => url && url !== siteUrl)
+  ];
+
 
   for (const link of allPages) {
     try {

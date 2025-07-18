@@ -66,14 +66,14 @@
             />
             Img Responsive Check
           </label>
-          <label>
+          <!-- <label>
             <input
               type="checkbox"
               value="navbarSpellCheckTest"
               v-model="selectedTests"
             />
             Spell Check
-          </label>
+          </label> -->
           <label>
             <input
               type="checkbox"
